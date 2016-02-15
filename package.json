@@ -1,0 +1,31 @@
+{
+  "name": "Paul-Shorey-Dev",
+  "version": "1.0.0",
+  "description": "My dev environment",
+  "author": "Paul Shorey",
+  "scripts": {
+    "preinstall": "npm i -g gulp"
+  },
+  "dependencies": {
+    "node-phantom-simple": "latest",
+    "node-horseman": "latest",
+    "body-parser": "latest",
+    "tracer": "latest",
+    "colors": "latest",
+    "express": "latest",
+    "moment": "latest",
+    "q": "latest",
+    "request": "latest",
+    "serve-static": "latest",
+    "url": "latest"
+  },
+  "devDependencies": {
+    "jshint": "latest",
+    "gulp-concat": "latest",
+    "gulp-jsbeautifier": "latest",
+    "gulp-jshint": "latest",
+    "gulp-rename": "latest",
+    "gulp-sass": "latest",
+    "gulp-uglify": "latest"
+  }
+}

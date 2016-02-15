@@ -1,0 +1,138 @@
+[
+  {
+    "name": "advertisement",
+    "fields": {
+      "agency": {
+        "object": "agency"
+      },
+      "channel": {
+        "object": "channel"
+      },
+      "marketing_campaign": {
+        "object": "marketing_campaign"
+      }
+    }
+  },
+  {
+    "name": "agency",
+    "fields": {
+      "name": {
+        "type": "string"
+      },
+      "description": {
+        "type": "text"
+      },
+      "advertisement": {
+        "collection": "advertisement",
+        "via": "agency"
+      },
+      "invoice": {
+        "collection": "invoice",
+        "via": "agency"
+      }
+    }
+  },
+  {
+    "name": "channel",
+    "fields": {
+      "channel_type": {
+        "object": "channel_type"
+      },
+      "name": {
+        "type": "string"
+      },
+      "description": {
+        "type": "text"
+      },
+      "advertisement": {
+        "collection": "advertisement",
+        "via": "channel"
+      }
+    }
+  },
+  {
+    "name": "channel_type",
+    "fields": {
+      "name": {
+        "type": "string"
+      },
+      "description": {
+        "type": "text"
+      },
+      "channel": {
+        "collection": "channel",
+        "via": "channel_type"
+      }
+    }
+  },
+  {
+    "name": "client",
+    "fields": {
+      "Name": {
+        "type": "string"
+      },
+      "Ordinal": {
+        "type": "float"
+      },
+      "invoice": {
+        "collection": "invoice",
+        "via": "client"
+      }
+    }
+  },
+  {
+    "name": "invoice",
+    "fields": {
+      "agency": {
+        "object": "agency"
+      },
+      "client": {
+        "object": "client"
+      },
+      "invoice_status": {
+        "object": "invoice_status"
+      }
+    }
+  },
+  {
+    "name": "invoice_status",
+    "fields": {
+      "name": {
+        "type": "string"
+      },
+      "description": {
+        "type": "text"
+      },
+      "invoice": {
+        "collection": "invoice",
+        "via": "invoice_status"
+      }
+    }
+  },
+  {
+    "name": "items",
+    "fields": {
+      "name": {
+        "type": "string"
+      },
+      "description": {
+        "type": "text"
+      }
+    }
+  },
+  {
+    "name": "marketing_campaign",
+    "fields": {
+      "name": {
+        "type": "string"
+      },
+      "description": {
+        "type": "text"
+      },
+      "advertisement": {
+        "collection": "advertisement",
+        "via": "marketing_campaign"
+      }
+    }
+  }
+]
