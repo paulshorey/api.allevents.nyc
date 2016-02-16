@@ -67,7 +67,8 @@ exports.stringify_once = function(obj, replacer, indent) {
 			}
 		}
 	}
-	return JSON.stringify(obj, printOnceReplacer, indent);
+	var stringified = JSON.stringify(obj, printOnceReplacer, indent);
+	return stringified;
 };
 
 exports.to_query_string = function(obj) {

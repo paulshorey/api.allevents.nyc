@@ -21,17 +21,32 @@ pro.app.use(pro.inc.express_parser.urlencoded({
 pro.fun = require("./node_custom/fun.js");
 pro.console = require("./node_custom/console.js").console; // uses pro.app
 pro.response = require("./node_custom/response.js");
-pro.contentful = require("./node_custom/contentful.js");
 pro.backand = require("./node_custom/backand.js");
 // secret
-pro.secret = require('../../secret/all.js');
-pro.fail = function() {}
+pro.secret = require('../secret.nyc/all.js');
+// contentful
+pro.contentful = require("./node_custom/contentful.js");
+pro.contentful.access_token = '37e4f99b2ba5c765fd24465aee352bfe1b432b867fbf59f8bce86affd9f6eed9';
+pro.contentful.space = '3yg4icqjbit3';
+pro.contentful.types = {};
+pro.contentful.types.category = '4ZtFRQqGfYI2YoiEQwkyKo';
+pro.contentful.types.site = '30oK9ITXssOSSyUGwWWCOg';
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+// VIEW
+var view = {};
+pro.contentful.entries( 'category' ,function(output){
+	view[ 'category' ] = output;	
+});
+pro.contentful.entries( 'site' ,function(output){
+	view[ 'site' ] = output;	
+});
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // SITES
 process.app.get('/sites', function(request, response) {
 	process.console.warn('all sites');
+	pro.console.info('contentful',view);
 	var data = [{
 		"id": "0",
 		"protocol": "http://",
@@ -70,11 +85,6 @@ process.app.post('/site', function(request, response) {
 	// get
 	var sid = pro.fun.url_uid(request.body.site.meta.link);
 	var site = pro.fs.readFile('./site/' + sid + '.json', 'utf8', function(error, old) {
-		// error
-		// if (error) {
-		// 	pro.console.error(error);
-		// 	return false;
-		// }
 		// debug
 		if (request.body.site && request.body.site.items) {
 			// edit
@@ -127,7 +137,6 @@ process.app.get('*', function(request, response) {
 	var sid = pro.fun.url_uid(request.query.url);
 	pro.console.log('readFile: ./site/' + sid + '.json');
 	pro.fs.readFile('./site/' + sid + '.json', 'utf8', function(error, old) {
-		pro.console.info(old);
 		if (old) {
 			process.response.json(response, {
 				data: old

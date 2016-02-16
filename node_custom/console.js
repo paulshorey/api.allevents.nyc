@@ -24,7 +24,7 @@ exports.console = require('tracer').colorConsole({
 					data.args[each] = callback.toString();
 				})(data.args[each]);
 			}
-			data.args[each] = process.fun.stringify_once(data.args[each],null,'\t');
+			data.args[each] = process.fun.stringify_once(data.args[each],null,'');
 			if (data.args[each]) {
 				data.args[each] = data.args[each].replace(/(?:\r\n|\r|\n)/g, '\t').replace(/\t/g, ' ');
 			}

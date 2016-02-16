@@ -15,14 +15,27 @@ exports.json.error = function(response,body) {
 	if (! ( code>99 && code <999 ) ) {
 		code = 500;
 	}
+	body = process.fun.stringify_once(body);
+	body = process.fun.stripslashes(body);
+	
 	response.setHeader('Content-Type', 'application/json');
 	response.writeHead(code);
-	response.write(process.fun.stringify_once(body));
+	response.write(body);
 	response.end();
 };
 exports.json.success = function(response,body) {
+	body = process.fun.stringify_once(body);
+	body = process.fun.stripslashes(body);
+	
 	response.setHeader('Content-Type', 'application/json');
 	response.writeHead(200);
-	response.write(process.fun.stringify_once(body));
+	response.write(body);
+	response.end();
+};
+
+exports.html = function(response, body) {
+	response.setHeader('Content-Type', 'text/html');
+	response.writeHead(200);
+	response.write(body);
 	response.end();
 };
