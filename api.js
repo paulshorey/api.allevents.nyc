@@ -46,7 +46,6 @@ pro.contentful.entries( 'site' ,function(output){
 // SITES
 process.app.get('/sites', function(request, response) {
 	process.console.warn('all sites');
-	pro.console.info('contentful',view);
 	var data = [{
 		"id": "0",
 		"protocol": "http://",
@@ -69,7 +68,7 @@ process.app.get('/sites', function(request, response) {
 // GET SITE
 process.app.post('/site', function(request, response) {
 	// validate
-	if (!request.body.site || !request.body.site.meta || !request.body.site.meta.link) {
+	if (!request.body.site || !request.body.site.meta || !request.body.site.meta.url) {
 		// fail
 		var error = {
 			message: 'POST /site requires request.site=={}'
@@ -81,9 +80,9 @@ process.app.post('/site', function(request, response) {
 	if (!pro.fs.existsSync('./site')) {
 		pro.fs.mkdirSync('./site');
 	}
-	pro.console.info('POST ' + request.body.site.meta.link);
+	pro.console.info('POST ' + request.body.site.meta.url);
 	// get
-	var sid = pro.fun.url_uid(request.body.site.meta.link);
+	var sid = pro.fun.url_uid(request.body.site.meta.url);
 	var site = pro.fs.readFile('./site/' + sid + '.json', 'utf8', function(error, old) {
 		// debug
 		if (request.body.site && request.body.site.items) {
@@ -106,20 +105,15 @@ process.app.post('/site', function(request, response) {
 						console.log('File error:', err);
 					}
 				});
-			pro.console.warn('file?', file);
 		}
-	});
-	// success
-	process.response.json(response, {
-		data: {}
 	});
 
 });
 
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////
 // GET SITE
-process.app.get('*', function(request, response) {
+process.app.get('/site', function(request, response) {
 	// validate
 	if (!request.query.url || request.query.url.indexOf('http') !== 0) {
 		// fail
@@ -139,25 +133,25 @@ process.app.get('*', function(request, response) {
 	pro.fs.readFile('./site/' + sid + '.json', 'utf8', function(error, old) {
 		if (old) {
 			process.response.json(response, {
-				data: old
+				data: JSON.parse(old)
 			});
 		}
 	});
 });
 
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-// 404
-process.app.all('*', function(request, response) {
-	// fail
-	var error = {
-		code: 400,
-		status: "error",
-		message: 'Page not found - bad request'
-	};
-	process.console.warn(error.message);
-	process.response.json(response, error);
-});
+// ////////////////////////////////////////////////////////////////////////////////////////////////////
+// // 404
+// process.app.all('*', function(request, response) {
+// 	// fail
+// 	var error = {
+// 		code: 400,
+// 		status: "error",
+// 		message: 'Page not found - bad request'
+// 	};
+// 	process.console.warn(error.message);
+// 	process.response.json(response, error);
+// });
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

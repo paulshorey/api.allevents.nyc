@@ -16,7 +16,7 @@ exports.json.error = function(response,body) {
 		code = 500;
 	}
 	body = process.fun.stringify_once(body);
-	body = process.fun.stripslashes(body);
+	//body = process.fun.stripslashes(body);
 	
 	response.setHeader('Content-Type', 'application/json');
 	response.writeHead(code);
@@ -25,7 +25,7 @@ exports.json.error = function(response,body) {
 };
 exports.json.success = function(response,body) {
 	body = process.fun.stringify_once(body);
-	body = process.fun.stripslashes(body);
+	//body = process.fun.stripslashes(body);
 	
 	response.setHeader('Content-Type', 'application/json');
 	response.writeHead(200);
