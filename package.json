@@ -7,8 +7,6 @@
     "preinstall": "npm i -g gulp"
   },
   "dependencies": {
-    "node-phantom-simple": "latest",
-    "node-horseman": "latest",
     "body-parser": "latest",
     "tracer": "latest",
     "colors": "latest",
@@ -17,7 +15,8 @@
     "q": "latest",
     "request": "latest",
     "serve-static": "latest",
-    "url": "latest"
+    "url": "latest",
+    "underscore": "latest"
   },
   "devDependencies": {
     "jshint": "latest",
