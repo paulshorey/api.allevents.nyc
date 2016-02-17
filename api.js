@@ -30,18 +30,14 @@ pro.backand = require("./node_custom/backand.js");
 pro.secret = require('../secret.nyc/all.js');
 // contentful
 pro.contentful = require("./node_custom/contentful.js");
-pro.contentful.access_token = '37e4f99b2ba5c765fd24465aee352bfe1b432b867fbf59f8bce86affd9f6eed9';
-pro.contentful.space = '3yg4icqjbit3';
+pro.contentful.access_token = '2275b86b0346a8f71ac2d012c153c7e50281f9c13f4d71af7d543a8557889ba3';
+pro.contentful.space = 'whctzlb9j9p2';
 pro.contentful.types = {};
-pro.contentful.types.category = '4ZtFRQqGfYI2YoiEQwkyKo';
-pro.contentful.types.site = '30oK9ITXssOSSyUGwWWCOg';
+pro.contentful.types.site = 'site';
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // VIEW
 var view = {};
-pro.contentful.entries('category', function(output) {
-	view['category'] = output;
-});
 pro.contentful.entries('site', function(output) {
 	view['site'] = output;
 	for (var si in view.site.items) {
@@ -54,7 +50,6 @@ pro.contentful.entries('site', function(output) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // POST SITES
 process.app.post('/sites', function(request, response) {
-	var sites = view.site;
 	// var moreSites = {
 	// 	items: {
 	// 		"http://162.243.253.46": {
@@ -67,11 +62,11 @@ process.app.post('/sites', function(request, response) {
 	// 	}
 	// };
 	// sites.items = pro._.extend(sites.items, moreSites.items);
-	//process.console.log('sites', sites);
-	if (sites.items) {
+	process.console.log('view.site.items', view.site.items);
+	if (view.site.items) {
 		response.setHeader('Content-Type', 'application/json');
 		response.writeHead(200);
-		response.write(pro.fun.stringify_once(sites.items));
+		response.write(pro.fun.stringify_once(view.site.items));
 		response.end();
 	}
 });
@@ -81,11 +76,11 @@ process.app.post('/sites', function(request, response) {
 // POST SITE
 process.app.post('/site', function(request, response) {
 	// validate
-	if (!request.body.site || !request.body.site.meta || !request.body.site.items) {
+	if (!request.body.site || !request.body.site.url || !request.body.site.items) {
 		// fail
 		var error = {
 			code: 510,
-			message: '/site POST requires request.body.site == {meta:{},items:{}}'
+			message: '/site POST requires request.body.site == {url:string,items:{}}'
 		}
 		process.console.warn(error.message);
 		process.response.json(response, error);
@@ -95,12 +90,10 @@ process.app.post('/site', function(request, response) {
 		pro.fs.mkdirSync('./site');
 	}
 	// edit
-	var post = {};
-	post.items = request.body.site.items;
-	post.meta = request.body.site.meta;
+	var post = request.body.site;
 	// save
-	var sid = pro.fun.url_uid(request.body.site.meta.url);
-	pro.console.log('site url: ' + request.body.site.meta.url);
+	var sid = pro.fun.url_uid(request.body.site.url);
+	pro.console.log('site url: ' + request.body.site.url);
 	pro.console.log('writeFile: ./site/' + sid + '.json');
 	var file = process.fs.writeFile(
 		'./site/' + sid + '.json',
