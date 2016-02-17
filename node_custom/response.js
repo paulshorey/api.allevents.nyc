@@ -1,13 +1,12 @@
 exports.json = function(response, body) {
 	if (!response) {
-		process.console.error('response.json requires arguments (response, body)');
+		process.console.error('response.json requires (response, body)');
 	}
-	if (body.status=="error") {
+	// assume success
+	if (body.status=="error" || body.code>=300) {
 		process.response.json.error(response,body);
-	} else if (body.data || body.status=="success") {
-		process.response.json.success(response,body);
 	} else {
-		process.response.json.error(response,body);
+		process.response.json.success(response,body);
 	}
 };
 exports.json.error = function(response,body) {
@@ -16,7 +15,6 @@ exports.json.error = function(response,body) {
 		code = 500;
 	}
 	body = process.fun.stringify_once(body);
-	//body = process.fun.stripslashes(body);
 	
 	response.setHeader('Content-Type', 'application/json');
 	response.writeHead(code);
@@ -24,8 +22,12 @@ exports.json.error = function(response,body) {
 	response.end();
 };
 exports.json.success = function(response,body) {
+	if (!body) {
+		body = { data: {} };
+	} else if (!body.data) {
+		body = { data: body };
+	}
 	body = process.fun.stringify_once(body);
-	//body = process.fun.stripslashes(body);
 	
 	response.setHeader('Content-Type', 'application/json');
 	response.writeHead(200);
