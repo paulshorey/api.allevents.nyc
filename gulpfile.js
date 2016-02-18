@@ -11,19 +11,19 @@ var beautify = require('gulp-jsbeautifier');
 
 // CSS
 gulp.task('css', function() {
-	return gulp.src('scss/*.scss')
+	return gulp.src('*.scss', '*/*.scss', '*/*/*.scss')
 		.pipe(sass())
 		.pipe(gulp.dest('css'));
 });
 
 // JS
 gulp.task('jsLint', function() {
-	return gulp.src(['*.js', 'js/*.js'])
+	return gulp.src(['*.js', '*/*.js', '*/*/*.js'])
 		.pipe(jshint())
 		.pipe(jshint.reporter('default'));
 });
 gulp.task('jsBeautify', function() {
-	gulp.src(['*.js', 'js/*.js'])
+	gulp.src(['*.js', '*/*.js', '*/*/*.js'])
 		.pipe(beautify({
 			js: {
 				indentSize: 1,
@@ -34,7 +34,7 @@ gulp.task('jsBeautify', function() {
 		.pipe(gulp.dest('.'));
 });
 gulp.task('jsUglify', function() {
-	return gulp.src(['*.js', 'js/*.js'])
+	return gulp.src(['*.js', '*/*.js', '*/*/*.js'])
 		.pipe(concat('all.js'))
 		.pipe(gulp.dest('dist'))
 		.pipe(rename('all.min.js'))
@@ -43,10 +43,8 @@ gulp.task('jsUglify', function() {
 });
 
 // Watch Files For Changes
-gulp.task('watching', function() {
-	gulp.watch(['*.js', 'js/*.js'], ['jsLint', 'jsBeautify']);
-	gulp.watch('scss/*.scss', ['css']);
-});
-
 gulp.task('default', ['jsLint', 'jsBeautify', 'css']);
-gulp.task('watch', ['jsLint', 'jsBeautify', 'css', 'watching']);
+
+gulp.task('watch', function() {
+	gulp.watch(['*.js', '*/*.js', '*/*/*.js'], ['jsLint', 'jsBeautify']);
+});
