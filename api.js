@@ -40,9 +40,9 @@ pro.contentful.types.site = 'site';
 // VIEW
 var view = {};
 pro.contentful.entries('site', function(output) {
-	view['site'] = output;
-	view.site.items.host = view.site.items.url.match(/(^https?:\/\/[a-z.-]*[a-z]*)/);
+	view.site = output;
 	for (var si in view.site.items) {
+		view.site.items[si].host = view.site.items[si].url.match(/(^https?:\/\/[a-z.-]*[a-z]*)/)[1];
 		view.site.items[si].link = view.site.items[si].url.replace(/{{date:([\w-\/.:\[\]\ ]*)}}/g, function(match, one) {
 			return pro.moment.now.format(one);
 		});
