@@ -9,6 +9,7 @@ pro.request = require('request');
 pro.fs = require('fs');
 pro.q = require('q');
 pro._ = require('underscore');
+
 // env
 pro.env.PORT = 8000;
 pro.env.PATH = __dirname;
@@ -40,6 +41,7 @@ pro.contentful.types.site = 'site';
 var view = {};
 pro.contentful.entries('site', function(output) {
 	view['site'] = output;
+	view.site.items.host = view.site.items.url.match(/(^https?:\/\/[a-z.-]*[a-z]*)/);
 	for (var si in view.site.items) {
 		view.site.items[si].link = view.site.items[si].url.replace(/{{date:([\w-\/.:\[\]\ ]*)}}/g, function(match, one) {
 			return pro.moment.now.format(one);
