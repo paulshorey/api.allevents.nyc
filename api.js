@@ -64,7 +64,7 @@ view.getContent = function(item,items){ // contentful content_type , file and va
 		// cloud
 		items_new = process.contentful.myEntries(items_new, undefined, item); // from contentful
 		// file
-		pro.fs.readFile('./data/'+items+'.json', 'utf8', function(error, items_old) {
+		pro.fs.readFile('./app/json/'+items+'.json', 'utf8', function(error, items_old) {
 			// readFile
 			items_old = JSON.parse(items_old)||{}; // from file
 			// memory
@@ -84,16 +84,16 @@ view.getContent = function(item,items){ // contentful content_type , file and va
 					}
 				}
 				// writeFile
-				if (!pro.fs.existsSync('./data')) {
-					pro.fs.mkdirSync('./data');
+				if (!pro.fs.existsSync('./app/json')) {
+					pro.fs.mkdirSync('./app/json');
 				}
 				var file = process.fs.writeFile(
-					'./data/'+items+'.json',
+					'./app/json/'+items+'.json',
 					JSON.stringify(view[items]),
 					'utf8',
 					function(error) {
 						if (error) {
-							process.console.error('Couldn not write file ./data/'+items+'.json');
+							process.console.error('Couldn not write file ./app/json/'+items+'.json');
 							return false;
 						}
 					}
@@ -153,16 +153,19 @@ process.app.post('/site', function(request, response) {
 		process.response.json(response, error);
 		return false;
 	}
-	if (!pro.fs.existsSync('./data/sites')) {
-		pro.fs.mkdirSync('./data/sites');
+	if (!pro.fs.existsSync('./app/json/sites')) {
+		pro.fs.mkdirSync('./app/json/sites');
 	}
 	
-	// site
+	// filter
 	var site = request.body.site;
+	//site.urlEncoded = encodeUri
+	
+	// site
 	var sid = pro.fun.url_uid(request.body.site.url);
 	pro.console.log('post site: ' + request.body.site.url);
 	var file = process.fs.writeFile(
-		'./data/sites/' + sid + '.json',
+		'./app/json/sites/' + sid + '.json',
 		JSON.stringify(site),
 		'utf8',
 		function(error) {
@@ -182,12 +185,12 @@ process.app.post('/site', function(request, response) {
 	// sites
 	view.sites[site.url] = site;
 	var file = process.fs.writeFile(
-		'./data/sites.json',
+		'./app/json/sites.json',
 		JSON.stringify(view.sites),
 		'utf8',
 		function(error) {
 			if (error) {
-				process.console.error("Couldn't write file ./data/sites.json");
+				process.console.error("Couldn't write file ./app/json/sites.json");
 				return false;
 			}
 		}
@@ -209,13 +212,13 @@ process.app.get('/site', function(request, response) {
 		process.response.json(response, error);
 		return false;
 	}
-	if (!pro.fs.existsSync('./data/sites')) {
-		pro.fs.mkdirSync('./data/sites');
+	if (!pro.fs.existsSync('./app/json/sites')) {
+		pro.fs.mkdirSync('./app/json/sites');
 	}
 	// get
 	var sid = pro.fun.url_uid(request.query.url);
 	pro.console.log('get site: ' + request.query.url);
-	pro.fs.readFile('./data/sites/' + sid + '.json', 'utf8', function(error, site) {
+	pro.fs.readFile('./app/json/sites/' + sid + '.json', 'utf8', function(error, site) {
 		if (site) {
 			// response: success
 			process.response.json(response, JSON.parse(site));
