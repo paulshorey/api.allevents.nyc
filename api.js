@@ -9,7 +9,7 @@ pro.request = require('request');
 pro.fs = require('fs');
 pro.q = require('q');
 pro._ = require('underscore');
-
+pro.contentful = require('contentful');
 // env
 pro.env.PORT = 8000;
 pro.env.PATH = __dirname;
@@ -26,35 +26,92 @@ pro.app.use(pro.inc.express_parser.urlencoded({
 pro.fun = require("./node_custom/fun.js");
 pro.console = require("./node_custom/console.js").console; // uses pro.app
 pro.response = require("./node_custom/response.js");
-pro.backand = require("./node_custom/backand.js");
 // secret
 pro.secret = require('../secret.nyc/all.js');
 // contentful
-pro.contentful = require("./node_custom/contentful.js");
-pro.contentful.access_token = '2275b86b0346a8f71ac2d012c153c7e50281f9c13f4d71af7d543a8557889ba3';
-pro.contentful.space = 'whctzlb9j9p2';
-pro.contentful.types = {};
-pro.contentful.types.site = 'site';
+process.contentful.myClient = pro.contentful.createClient({
+  space: 'whctzlb9j9p2',
+  accessToken: '2275b86b0346a8f71ac2d012c153c7e50281f9c13f4d71af7d543a8557889ba3'
+  // ,secure: true
+  // ,host: 'cdn.contentful.com'
+  // ,resolveLinks: true
+  // agent: agentInstance
+});
+process.contentful.myEntries = function(entries){
+	for (var index in entries) {
+		if (entries[index].sys && entries[index].fields) {
+			entries[index] = entries[index].fields;
+			for (var field in entries[index]) {
+				if (typeof entries[index][field] == 'object') {
+					entries[index][field] = process.contentful.myEntries(entries[index][field]);
+				}
+			}
+		}
+	}
+	return entries;
+};
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // VIEW
 var view = {};
-pro.contentful.entries('site', function(output) {
-	view.site = output;
-	for (var si in view.site.items) {
-		view.site.items[si].host = view.site.items[si].url.match(/(^https?:\/\/[a-z.-]*[a-z]*)/)[1];
-		view.site.items[si].link = view.site.items[si].url.replace(/{{date:([\w-\/.:\[\]\ ]*)}}/g, function(match, one) {
-			return pro.moment.now.format(one);
+// sites
+view.getContent = function(item,items){ // contentful content_type , file and variable name plural.json
+	view[items] = {};
+	
+	pro.contentful.myClient.entries({ content_type: item })
+	.then(function(items_new) {
+		// cloud
+		items_new = process.contentful.myEntries(items_new, undefined, item); // from contentful
+		// file
+		pro.fs.readFile('./data/'+items+'.json', 'utf8', function(error, items_old) {
+			// readFile
+			items_old = JSON.parse(items_old)||{}; // from file
+			// memory
+			if (items_new) {
+				for (var si in items_new) {
+					if (items_old[si]) {
+						view[items][si] = pro._.extend(items_old[si],items_new[si]);
+					} else {
+						view[items][si] = items_new[si];
+					}
+					// site only
+					if (item=='site') {
+						view[items][si].host = view[items][si].url.match(/(^https?:\/\/[a-z.-]*[a-z]*)/)[1];
+						view[items][si].link = view[items][si].url.replace(/{{date:([\w-\/.:\[\]\ ]*)}}/g, function(match, one) {
+							return pro.moment.now.format(one);
+						});
+					}
+				}
+				// writeFile
+				if (!pro.fs.existsSync('./data')) {
+					pro.fs.mkdirSync('./data');
+				}
+				var file = process.fs.writeFile(
+					'./data/'+items+'.json',
+					JSON.stringify(view[items]),
+					'utf8',
+					function(error) {
+						if (error) {
+							process.console.error('Couldn not write file ./data/'+items+'.json');
+							return false;
+						}
+					}
+				);
+			}
 		});
-	}
-});
+	});
+};
+view.getContent('site','sites');
+view.getContent('category','categories');
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // HOOK
 process.app.all('/hook', function(request, response) {
-	process.exit();
+	view.getContent('site','sites');
+	view.getContent('category','categories');
 });
 
 
@@ -62,11 +119,20 @@ process.app.all('/hook', function(request, response) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // GET SITES
 process.app.get('/sites', function(request, response) {
-	process.console.log('view.site.items', view.site.items);
-	if (view.site.items) {
+	process.console.log('get /sites');
+	if (view.sites) {
 		response.setHeader('Content-Type', 'application/json');
 		response.writeHead(200);
-		response.write(pro.fun.stringify_once(view.site.items));
+		response.write(JSON.stringify(view.sites));
+		response.end();
+	}
+});
+process.app.get('/categories', function(request, response) {
+	process.console.log('get /categories');
+	if (view.categories) {
+		response.setHeader('Content-Type', 'application/json');
+		response.writeHead(200);
+		response.write(JSON.stringify(view.categories));
 		response.end();
 	}
 });
@@ -83,22 +149,21 @@ process.app.post('/site', function(request, response) {
 			code: 510,
 			message: '/site POST requires request.body.site == {url:string,items:{}}'
 		}
-		process.console.warn(error.message);
+		process.console.error(error.message);
 		process.response.json(response, error);
 		return false;
 	}
-	if (!pro.fs.existsSync('./site')) {
-		pro.fs.mkdirSync('./site');
+	if (!pro.fs.existsSync('./data/sites')) {
+		pro.fs.mkdirSync('./data/sites');
 	}
-	// edit
-	var post = request.body.site;
-	// save
+	
+	// site
+	var site = request.body.site;
 	var sid = pro.fun.url_uid(request.body.site.url);
-	pro.console.log('site url: ' + request.body.site.url);
-	pro.console.log('writeFile: ./site/' + sid + '.json');
+	pro.console.log('post site: ' + request.body.site.url);
 	var file = process.fs.writeFile(
-		'./site/' + sid + '.json',
-		JSON.stringify(post),
+		'./data/sites/' + sid + '.json',
+		JSON.stringify(site),
 		'utf8',
 		function(error) {
 			// response: error
@@ -111,8 +176,22 @@ process.app.post('/site', function(request, response) {
 			}
 			// response: success
 			process.response.json(response, {});
-		});
+		}
+	);
 
+	// sites
+	view.sites[site.url] = site;
+	var file = process.fs.writeFile(
+		'./data/sites.json',
+		JSON.stringify(view.sites),
+		'utf8',
+		function(error) {
+			if (error) {
+				process.console.error("Couldn't write file ./data/sites.json");
+				return false;
+			}
+		}
+	);
 });
 
 
@@ -130,14 +209,13 @@ process.app.get('/site', function(request, response) {
 		process.response.json(response, error);
 		return false;
 	}
-	if (!pro.fs.existsSync('./site')) {
-		pro.fs.mkdirSync('./site');
+	if (!pro.fs.existsSync('./data/sites')) {
+		pro.fs.mkdirSync('./data/sites');
 	}
 	// get
 	var sid = pro.fun.url_uid(request.query.url);
-	pro.console.log('site url: ' + request.query.url);
-	pro.console.log('readFile: ./site/' + sid + '.json');
-	pro.fs.readFile('./site/' + sid + '.json', 'utf8', function(error, site) {
+	pro.console.log('get site: ' + request.query.url);
+	pro.fs.readFile('./data/sites/' + sid + '.json', 'utf8', function(error, site) {
 		if (site) {
 			// response: success
 			process.response.json(response, JSON.parse(site));

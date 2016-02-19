@@ -14,7 +14,7 @@ exports.json.error = function(response,body) {
 	if (! ( code>99 && code <999 ) ) {
 		code = 500;
 	}
-	body = process.fun.stringify_once(body);
+	body = JSON.stringify(body);
 	
 	response.setHeader('Content-Type', 'application/json');
 	response.writeHead(code);
@@ -27,7 +27,7 @@ exports.json.success = function(response,body) {
 	} else if (!body.data) {
 		body = { data: body };
 	}
-	body = process.fun.stringify_once(body);
+	body = JSON.stringify(body);
 	
 	response.setHeader('Content-Type', 'application/json');
 	response.writeHead(200);

@@ -24,7 +24,7 @@ exports.console = require('tracer').colorConsole({
 					data.args[each] = callback.toString();
 				})(data.args[each]);
 			}
-			data.args[each] = process.fun.stringify_once(data.args[each],null,'');
+			data.args[each] = process.console.stringify(data.args[each],null,'');
 			if (data.args[each]) {
 				data.args[each] = data.args[each].replace(/(?:\r\n|\r|\n)/g, '\t').replace(/\t/g, ' ');
 			}
@@ -98,3 +98,45 @@ if (process.app && process.app.get) {
 		response.end();
 	});
 }
+
+// functions
+exports.console.stringify = function(obj, replacer, indent) {
+	var printedObjects = [];
+	var printedObjectKeys = [];
+
+	function printOnceReplacer(key, value) {
+		if (printedObjects.length > 2000) { // browsers will not print more than 20K, I don't see the point to allow 2K.. algorithm will not be fast anyway if we have too many objects
+			return 'object too long';
+		}
+		var printedObjIndex = false;
+		printedObjects.forEach(function(obj, index) {
+			if (obj === value) {
+				printedObjIndex = index;
+			}
+		});
+
+		if (key === '') { //root element
+			printedObjects.push(obj);
+			printedObjectKeys.push("root");
+			return value;
+		} else if (printedObjIndex + "" != "false" && typeof(value) == "object") {
+			if (printedObjectKeys[printedObjIndex] == "root") {
+				return "(pointer to root)";
+			} else {
+				return "(see " + ((!!value && !!value.constructor) ? value.constructor.name.toLowerCase() : typeof(value)) + " with key " + printedObjectKeys[printedObjIndex] + ")";
+			}
+		} else {
+
+			var qualifiedKey = key || "(empty key)";
+			printedObjects.push(value);
+			printedObjectKeys.push(qualifiedKey);
+			if (replacer) {
+				return replacer(key, value);
+			} else {
+				return value;
+			}
+		}
+	}
+	var stringified = JSON.stringify(obj, printOnceReplacer, indent);
+	return stringified;
+};

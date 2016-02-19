@@ -8,15 +8,16 @@
   },
   "dependencies": {
     "body-parser": "latest",
-    "tracer": "latest",
     "colors": "latest",
+    "contentful": "^2.1.2",
     "express": "latest",
     "moment": "latest",
     "q": "latest",
     "request": "latest",
     "serve-static": "latest",
-    "url": "latest",
-    "underscore": "latest"
+    "tracer": "latest",
+    "underscore": "latest",
+    "url": "latest"
   },
   "devDependencies": {
     "jshint": "latest",
