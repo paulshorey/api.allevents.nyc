@@ -22,6 +22,7 @@ pro.app.use(pro.inc.express_parser.urlencoded({
 	limit: '50mb',
 	extended: true
 }));
+pro.app.use(pro.inc.express.static('public'));
 // custom
 pro.fun = require("./node_custom/fun.js");
 pro.console = require("./node_custom/console.js").console; // uses pro.app
@@ -64,7 +65,7 @@ view.getContent = function(item,items){ // contentful content_type , file and va
 		// cloud
 		items_new = process.contentful.myEntries(items_new, undefined, item); // from contentful
 		// file
-		pro.fs.readFile('./app/public_html/json/'+items+'.json', 'utf8', function(error, items_old) {
+		pro.fs.readFile('./public/json/'+items+'.json', 'utf8', function(error, items_old) {
 			// readFile
 			items_old = JSON.parse(items_old)||{}; // from file
 			// memory
@@ -84,16 +85,16 @@ view.getContent = function(item,items){ // contentful content_type , file and va
 					}
 				}
 				// writeFile
-				if (!pro.fs.existsSync('./app/public_html/json')) {
-					pro.fs.mkdirSync('./app/public_html/json');
+				if (!pro.fs.existsSync('./public/json')) {
+					pro.fs.mkdirSync('./public/json');
 				}
 				var file = process.fs.writeFile(
-					'./app/public_html/json/'+items+'.json',
+					'./public/json/'+items+'.json',
 					JSON.stringify(view[items]),
 					'utf8',
 					function(error) {
 						if (error) {
-							process.console.error('Couldn not write file ./app/public_html/json/'+items+'.json');
+							process.console.error('Couldn not write file ./public/json/'+items+'.json');
 							return false;
 						}
 					}
@@ -153,8 +154,8 @@ process.app.post('/site', function(request, response) {
 		process.response.json(response, error);
 		return false;
 	}
-	if (!pro.fs.existsSync('./app/public_html/json/sites')) {
-		pro.fs.mkdirSync('./app/public_html/json/sites');
+	if (!pro.fs.existsSync('./public/json/sites')) {
+		pro.fs.mkdirSync('./public/json/sites');
 	}
 	
 	// filter
@@ -165,7 +166,7 @@ process.app.post('/site', function(request, response) {
 	var sid = pro.fun.url_uid(request.body.site.url);
 	pro.console.log('post site: ' + request.body.site.url);
 	var file = process.fs.writeFile(
-		'./app/public_html/json/sites/' + sid + '.json',
+		'./public/json/sites/' + sid + '.json',
 		JSON.stringify(site),
 		'utf8',
 		function(error) {
@@ -185,12 +186,12 @@ process.app.post('/site', function(request, response) {
 	// sites
 	view.sites[site.url] = site;
 	var file = process.fs.writeFile(
-		'./app/public_html/json/sites.json',
+		'./public/json/sites.json',
 		JSON.stringify(view.sites),
 		'utf8',
 		function(error) {
 			if (error) {
-				process.console.error("Couldn't write file ./app/public_html/json/sites.json");
+				process.console.error("Couldn't write file ./public/json/sites.json");
 				return false;
 			}
 		}
@@ -212,13 +213,13 @@ process.app.get('/site', function(request, response) {
 		process.response.json(response, error);
 		return false;
 	}
-	if (!pro.fs.existsSync('./app/public_html/json/sites')) {
-		pro.fs.mkdirSync('./app/public_html/json/sites');
+	if (!pro.fs.existsSync('./public/json/sites')) {
+		pro.fs.mkdirSync('./public/json/sites');
 	}
 	// get
 	var sid = pro.fun.url_uid(request.query.url);
 	pro.console.log('get site: ' + request.query.url);
-	pro.fs.readFile('./app/public_html/json/sites/' + sid + '.json', 'utf8', function(error, site) {
+	pro.fs.readFile('./public/json/sites/' + sid + '.json', 'utf8', function(error, site) {
 		if (site) {
 			// response: success
 			process.response.json(response, JSON.parse(site));
