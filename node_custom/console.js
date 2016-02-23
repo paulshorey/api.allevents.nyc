@@ -40,7 +40,7 @@ exports.console = require('tracer').colorConsole({
 
 exports.console.file = {
 	content: '',
-	filedir: '.',
+	filedir: './public/console/logs',
 	append: function(method, args, context) {
 		var write = '';
 		write += '<script>' + '\n';
@@ -78,7 +78,7 @@ process.on('uncaughtException', function(err) {
 });
 process.on('exit', function(code) {
 	process.fs.writeFileSync(
-		process.console.file.filedir + '/.html',
+		process.console.file.filedir + '/exit.html',
 		process.console.file.content,
 		'utf8',
 		function(err) {
@@ -90,7 +90,7 @@ process.on('exit', function(code) {
 
 // view
 if (process.app && process.app.get) {
-	process.app.get('/log', function(request, response) {
+	process.app.get('/console.logs', function(request, response) {
 		process.console.warn('log');
 		response.setHeader('Content-Type', 'text/html');
 		response.writeHead(200);

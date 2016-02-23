@@ -11,7 +11,7 @@ pro.q = require('q');
 pro._ = require('underscore');
 pro.contentful = require('contentful');
 // env
-pro.env.PORT = 9999;
+pro.env.PORT = 8100;
 pro.env.PATH = __dirname;
 // app
 pro.app = pro.inc.express();
@@ -58,6 +58,7 @@ process.contentful.myEntries = function(entries){
 var view = {};
 // sites
 view.getContent = function(item,items){ // contentful content_type , file and variable name plural.json
+	pro.console.info('/hook contentful '+items+'');
 	view[items] = {};
 	
 	pro.contentful.myClient.entries({ content_type: item })
