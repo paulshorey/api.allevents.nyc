@@ -1,5 +1,4 @@
-cd /www
-cd api.nyc
+cd /www/$(hostname)
 i=1;
 while true; do
 	node api.js --iteration=$i
