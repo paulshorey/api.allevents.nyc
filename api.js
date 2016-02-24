@@ -166,7 +166,7 @@ process.app.post('/site', function(request, response) {
 	
 	// site
 	var sid = pro.fun.url_uid(request.body.site.url);
-	pro.console.log('post site: ' + request.body.site.url);
+	pro.console.log('post site: ' + encodeURIComponent(request.body.site.url));
 	var file = process.fs.writeFile(
 		'./public/json/sites/' + sid + '.json',
 		JSON.stringify(site),

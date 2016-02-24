@@ -126,7 +126,7 @@ process.on('exit', function(code) {
 // view
 if (process.app && process.app.get) {
 	process.app.get('/console/logs.html', function(request, response) {
-		process.console.warn('log');
+		//process.console.warn('log');
 		response.setHeader('Content-Type', 'text/html');
 		response.writeHead(200);
 		response.write(process.console.file.content);
