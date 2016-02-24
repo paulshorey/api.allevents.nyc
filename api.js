@@ -28,7 +28,7 @@ pro.fun = require("./node_custom/fun.js");
 pro.console = require("./node_custom/console.js").console; // uses pro.app
 pro.response = require("./node_custom/response.js");
 // secret
-pro.secret = require('../secret.nyc/all.js');
+pro.secret = require('../secret-nyc/all.js');
 // contentful
 process.contentful.myClient = pro.contentful.createClient({
   space: 'whctzlb9j9p2',
