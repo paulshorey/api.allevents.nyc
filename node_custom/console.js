@@ -37,6 +37,41 @@ exports.console = require('tracer').colorConsole({
 	}
 });
 
+exports.console.logFile = function(message, status) {
+	// start each day
+	if (this.logHTMLdate != DT.getFullYear() + '.' + this.str.pad(DT.getMonth()+1) + '.' + this.str.pad(DT.getDate())) {
+		this.logHTML = '';
+		this.logHTMLdate = DT.getFullYear() + '.' + this.str.pad(DT.getMonth()+1) + '.' + this.str.pad(DT.getDate());
+	}
+	// skip banal debug logs
+	if (status=='debug') {
+		return false;
+	}
+	// format
+	if (typeof message == 'object') {
+		message = JSON.stringify(Object.keys(message), null, ' ');
+	} else if (typeof message == 'function') {
+		message = JSON.stringify(message, null, ' ');
+	} else {
+		message = message;
+	}
+	// log
+	// to FILE
+	var action = (status=='error'||status=='info') ? status : 'log';
+	if (status=='warning') {
+		action = 'warn';
+	}
+	process.console.file.content = '<script>console.'+action+'(\''+message.replace(/\'/g, '\\\'')+'\');</script>\n' + this.logHTML;
+	process.fs.writeFile(
+		process.console.file.filedir + '/' + DT.getFullYear() + '.' + this.str.pad(DT.getMonth()+1) + '.' + this.str.pad(DT.getDate()) + '.html',
+		process.console.file.content,
+		'utf8',
+		function(err) {
+			if (err) {
+				process.console.warn('on exit, writeFileSync error: \n' + err.stack);
+			}
+		});
+};
 
 exports.console.file = {
 	content: '',
@@ -90,7 +125,7 @@ process.on('exit', function(code) {
 
 // view
 if (process.app && process.app.get) {
-	process.app.get('/console.logs', function(request, response) {
+	process.app.get('/console/logs.html', function(request, response) {
 		process.console.warn('log');
 		response.setHeader('Content-Type', 'text/html');
 		response.writeHead(200);

@@ -11,7 +11,7 @@ pro.q = require('q');
 pro._ = require('underscore');
 pro.contentful = require('contentful');
 // env
-pro.env.PORT = 8100;
+pro.env.PORT = 9000;
 pro.env.PATH = __dirname;
 // app
 pro.app = pro.inc.express();
@@ -88,6 +88,7 @@ view.getContent = function(item,items){ // contentful content_type , file and va
 				if (!pro.fs.existsSync('./public/json')) {
 					pro.fs.mkdirSync('./public/json');
 				}
+				process.console.info(view[items]);
 				var file = process.fs.writeFile(
 					'./public/json/'+items+'.json',
 					JSON.stringify(view[items]),
@@ -109,8 +110,9 @@ view.getContent('category','categories');
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-// HOOK
-process.app.all('/hook', function(request, response) {
+// CONTENFUL
+process.app.all('/hook/contentful', function(request, response) {
+	process.console.warn('/hook/contentful');
 	view.getContent('site','sites');
 	view.getContent('category','categories');
 });
