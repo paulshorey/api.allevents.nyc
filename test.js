@@ -7,8 +7,10 @@ var kitty = new Cat({ name: 'Zildjian' });
 kitty.save(function (err) {
   if (err) {
     console.log(err);
+    process.exit();
   } else {
     console.log('meow');
+    process.exit();
   }
 });
 
