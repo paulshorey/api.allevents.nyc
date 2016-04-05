@@ -12,6 +12,7 @@
     "contentful": "^2.1.2",
     "express": "latest",
     "moment": "latest",
+    "mongoose": "^4.4.11",
     "q": "latest",
     "request": "latest",
     "serve-static": "latest",
