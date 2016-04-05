@@ -11,3 +11,4 @@ kitty.save(function (err) {
     console.log('meow');
   }
 });
+
