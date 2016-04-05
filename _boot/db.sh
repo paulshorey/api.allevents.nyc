@@ -1,1 +1,1 @@
-mongo
+mongod
