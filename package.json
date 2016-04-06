@@ -11,6 +11,7 @@
     "colors": "latest",
     "contentful": "^2.1.2",
     "express": "latest",
+    "mkdirp": "^0.5.1",
     "moment": "latest",
     "mongoose": "^4.4.11",
     "q": "latest",

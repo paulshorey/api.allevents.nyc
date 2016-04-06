@@ -5,3 +5,5 @@ npm-debug
 err*
 out
 config
+public/console/logs*
+public/console/logs/*

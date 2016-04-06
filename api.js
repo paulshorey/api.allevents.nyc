@@ -9,7 +9,11 @@ pro.request = require('request');
 pro.fs = require('fs');
 pro.q = require('q');
 pro._ = require('underscore');
-pro.contentful = require('contentful');
+//pro.contentful = require('contentful');
+//pro.mkdirp = require('mkdirp');
+pro.mongoose = require('mongoose');
+// db
+pro.db = pro.mongoose.connect('mongodb://localhost/api');
 // env
 pro.env.PORT = 1080;
 pro.env.PATH = __dirname;
@@ -29,83 +33,111 @@ pro.console = require("./node_custom/console.js").console; // uses pro.app
 pro.response = require("./node_custom/response.js");
 // secret
 pro.secret = require('../secret-nyc/all.js');
-// contentful
-process.contentful.myClient = pro.contentful.createClient({
-  space: 'whctzlb9j9p2',
-  accessToken: '2275b86b0346a8f71ac2d012c153c7e50281f9c13f4d71af7d543a8557889ba3'
-  // ,secure: true
-  // ,host: 'cdn.contentful.com'
-  // ,resolveLinks: true
-  // agent: agentInstance
+// // contentful
+// process.contentful.myClient = pro.contentful.createClient({
+//   space: 'whctzlb9j9p2',
+//   accessToken: '2275b86b0346a8f71ac2d012c153c7e50281f9c13f4d71af7d543a8557889ba3'
+//   // ,secure: true
+//   // ,host: 'cdn.contentful.com'
+//   // ,resolveLinks: true
+//   // agent: agentInstance
+// });
+// process.contentful.myEntries = function(entries){
+// 	for (var index in entries) {
+// 		if (entries[index].sys && entries[index].fields) {
+// 			entries[index] = entries[index].fields;
+// 			for (var field in entries[index]) {
+// 				if (typeof entries[index][field] == 'object') {
+// 					entries[index][field] = process.contentful.myEntries(entries[index][field]);
+// 				}
+// 			}
+// 		}
+// 	}
+// 	return entries;
+// };
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+// MODEL
+process.schema = {};
+process.schema.site = process.db.Schema({
+	url: String
 });
-process.contentful.myEntries = function(entries){
-	for (var index in entries) {
-		if (entries[index].sys && entries[index].fields) {
-			entries[index] = entries[index].fields;
-			for (var field in entries[index]) {
-				if (typeof entries[index][field] == 'object') {
-					entries[index][field] = process.contentful.myEntries(entries[index][field]);
-				}
-			}
+process.model = {};
+process.model.site = process.db.model('site',pro.schema.site);
+
+
+var db = pro.mongoose.connection;
+db.on('error', console.error.bind(console, 'connection error:'));
+db.once('open', function() {
+	
+	process.model.site.find(function(err,results) {
+		if (err) {
+			return process.console.error(err);
 		}
-	}
-	return entries;
-};
+		process.console.trace(results);
+	});
+
+});
+
+setTimeout(function(){
+	process.exit();
+},1500);
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // VIEW
 var view = {};
-// sites
-view.getContent = function(item,items){ // contentful content_type , file and variable name plural.json
-	view[items] = {};
+// // sites
+// view.getContent = function(item,items){ // contentful content_type , file and variable name plural.json
+// 	view[items] = {};
 	
-	pro.contentful.myClient.entries({ content_type: item })
-	.then(function(items_new) {
-		// cloud
-		items_new = process.contentful.myEntries(items_new, undefined, item); // from contentful
-		// file
-		pro.fs.readFile('./public/json/'+items+'.json', 'utf8', function(error, items_old) {
-			// readFile
-			items_old = JSON.parse(items_old)||{}; // from file
-			// memory
-			if (items_new) {
-				for (var si in items_new) {
-					if (items_old[si]) {
-						view[items][si] = pro._.extend(items_old[si],items_new[si]);
-					} else {
-						view[items][si] = items_new[si];
-					}
-					// site only
-					if (item=='site') {
-						view[items][si].host = view[items][si].url.match(/(^https?:\/\/[a-z.-]*[a-z]*)/)[1];
-						view[items][si].link = view[items][si].url.replace(/{{date:([\w-\/.:\[\]\ ]*)}}/g, function(match, one) {
-							return pro.moment.now.format(one);
-						});
-					}
-				}
-				// writeFile
-				if (!pro.fs.existsSync('./public/json')) {
-					pro.fs.mkdirSync('./public/json');
-				}
-				process.console.info(view[items]);
-				var file = process.fs.writeFile(
-					'./public/json/'+items+'.json',
-					JSON.stringify(view[items]),
-					'utf8',
-					function(error) {
-						if (error) {
-							process.console.error('Couldn not write file ./public/json/'+items+'.json');
-							return false;
-						}
-					}
-				);
-			}
-		});
-	});
-};
-view.getContent('site','sites');
-view.getContent('category','categories');
+// 	pro.contentful.myClient.entries({ content_type: item })
+// 	.then(function(items_new) {
+// 		// cloud
+// 		items_new = process.contentful.myEntries(items_new, undefined, item); // from contentful
+// 		// file
+// 		pro.fs.readFile('./public/json/'+items+'.json', 'utf8', function(error, items_old) {
+// 			// readFile
+// 			items_old = JSON.parse(items_old)||{}; // from file
+// 			// memory
+// 			if (items_new) {
+// 				for (var si in items_new) {
+// 					if (items_old[si]) {
+// 						view[items][si] = pro._.extend(items_old[si],items_new[si]);
+// 					} else {
+// 						view[items][si] = items_new[si];
+// 					}
+// 					// site only
+// 					if (item=='site') {
+// 						view[items][si].host = view[items][si].url.match(/(^https?:\/\/[a-z.-]*[a-z]*)/)[1];
+// 						view[items][si].link = view[items][si].url.replace(/{{date:([\w-\/.:\[\]\ ]*)}}/g, function(match, one) {
+// 							return pro.moment.now.format(one);
+// 						});
+// 					}
+// 				}
+// 				// writeFile
+// 				if (!pro.fs.existsSync('./public/json')) {
+// 					pro.fs.mkdirSync('./public/json');
+// 				}
+// 				process.console.info(view[items]);
+// 				var file = process.fs.writeFile(
+// 					'./public/json/'+items+'.json',
+// 					JSON.stringify(view[items]),
+// 					'utf8',
+// 					function(error) {
+// 						if (error) {
+// 							process.console.error('Couldn not write file ./public/json/'+items+'.json');
+// 							return false;
+// 						}
+// 					}
+// 				);
+// 			}
+// 		});
+// 	});
+// };
+// view.getContent('site','sites');
+// view.getContent('category','categories');
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
