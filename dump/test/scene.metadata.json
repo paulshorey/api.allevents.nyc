@@ -1,1 +1,0 @@
-{ "options" : { "create" : "scene" }, "indexes" : [ { "v" : 1, "key" : { "_id" : 1 }, "ns" : "test.scene", "name" : "_id_" } ] }
