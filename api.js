@@ -88,11 +88,21 @@ model.contentful.getContent = function(item,items){
 model.mongoose = {};
 model.mongoose.schemas = {};
 model.mongoose.schemas.item = { 
-	url: String
+	_id: String,
+	text: { type:String, required: true },
+	timestamp: { type:Number, required: true },
+	img: String,
+	link: String,
+	categories: { type:Array, default: [] },
+	scenes: { type:Array, default: [] },
+	venue: String,
+	site: { 
+		link: { type:String, default: '' },
+		title: { type:String, default: '' }
+	}
+
 };
-model.mongoose.getContent = function() {
-	view.items = pro.mongoose.model('Item', model.mongoose.schemas.item);
-};
+model.mongoose.item = pro.mongoose.model('Item', model.mongoose.schemas.item);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -110,7 +120,7 @@ process.app.all('/hook/contentful', function(request, response) {
 	model.contentful.getContent('scene','scenes');
 });
 // view.items
-// not in memory, query model.items.find({},callback);
+// not in memory, query model.mongoose.item.find({},callback);
 
 
 
@@ -128,120 +138,128 @@ process.app.get('/sites', function(request, response) {
 	response.write(JSON.stringify({data:all, error:0},null,"\t"));
 	response.end();
 });
-process.app.get('/categories', function(request, response) {
-	process.console.log('get /categories');
-	if (model.contentful.categories) {
-		response.setHeader('Content-Type', 'application/json');
-		response.writeHead(200);
-		response.write(JSON.stringify({data:model.contentful.categories, error:0}));
-		response.end();
-	}
-});
-process.app.get('/scenes', function(request, response) {
-	process.console.log('get /scenes');
-	if (model.contentful.scenes) {
-		response.setHeader('Content-Type', 'application/json');
-		response.writeHead(200);
-		response.write(JSON.stringify({data:model.contentful.scenes, error:0}));
-		response.end();
-	}
-});
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-// POST SITE
-process.app.post('/site', function(request, response) {
-	// validate
-	if (!request.body.site || !request.body.site.url || !request.body.site.items) {
-		// fail
-		var error = {
-			code: 510,
-			message: '/site POST requires request.body.site == {url:string,items:{}}'
-		}
-		process.console.error(error.message);
-		process.response.json(response, error);
-		return false;
-	}
-	if (!pro.fs.existsSync('./public/json/sites')) {
-		pro.fs.mkdirSync('./public/json/sites');
-	}
-	
-	// filter
-	var site = request.body.site;
-	//site.urlEncoded = encodeUri
-	
-	// site
-	var sid = pro.fun.url_uid(request.body.site.url);
-	pro.console.log('post site: ' + encodeURIComponent(request.body.site.url));
-	var file = process.fs.writeFile(
-		'./public/json/sites/' + sid + '.json',
-		JSON.stringify(site),
-		'utf8',
-		function(error) {
-			// response: error
-			if (error) {
-				process.response.json(response, {
-					status: 'error',
-					message: "Couldn't write file .json"
-				});
-				return false;
-			}
-			// response: success
-			process.response.json(response, {});
-		}
-	);
-
-	// sites
-	model.contentful.sites[site.url] = site;
-	var file = process.fs.writeFile(
-		'./public/json/sites.json',
-		JSON.stringify(model.contentful.sites),
-		'utf8',
-		function(error) {
-			if (error) {
-				process.console.error("Couldn't write file ./public/json/sites.json");
-				return false;
-			}
-		}
-	);
-});
-
-
-//////////////////////////////////////////////////////////////////////////////////////////////////
-// GET SITE
-process.app.get('/site', function(request, response) {
-	// validate
-	if (!request.query.url || request.query.url.indexOf('http') !== 0) {
-		// fail
-		var error = {
-			code: 511,
-			message: 'GET /site requires ?url=http://...'
-		}
-		process.console.warn(error.message);
-		process.response.json(response, error);
-		return false;
-	}
-	if (!pro.fs.existsSync('./public/json/sites')) {
-		pro.fs.mkdirSync('./public/json/sites');
-	}
-	// get
-	var sid = pro.fun.url_uid(request.query.url);
-	pro.console.log('get site: ' + request.query.url);
-	pro.fs.readFile('./public/json/sites/' + sid + '.json', 'utf8', function(error, site) {
-		if (site) {
-			// response: success
-			process.response.json(response, JSON.parse(site));
+// GET ITEMS
+process.app.get('/items', function(request, response) {
+	var items;
+	model.mongoose.item.find(function(err, items){
+		if (err) {
+			return pro.console.warn(err);
 		} else {
-			// response: error
-			process.response.json(response, {
-				status: 'error',
-				message: "Couldn't find site file .json"
-			});
-			return false;
+			response.setHeader('Content-Type', 'application/json');
+			response.writeHead(200);
+			response.write(JSON.stringify({data:items, error:0},null,"\t"));
+			response.end();
 		}
 	});
+	// model.mongoose.item.create({ _id: Date.now() }, function (err, item) {
+	// 	if (err) {
+	// 		return pro.console.warn(err);
+	// 	} else {
+	// 		pro.console.log('created item');
+	// 		pro.console.log(item);
+	// 	}
+	// });
 });
+
+
+// //////////////////////////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////////////////////////////
+// // POST SITE
+// process.app.post('/site', function(request, response) {
+// 	// validate
+// 	if (!request.body.site || !request.body.site.url || !request.body.site.items) {
+// 		// fail
+// 		var error = {
+// 			code: 510,
+// 			message: '/site POST requires request.body.site == {url:string,items:{}}'
+// 		}
+// 		process.console.error(error.message);
+// 		process.response.json(response, error);
+// 		return false;
+// 	}
+// 	if (!pro.fs.existsSync('./public/json/sites')) {
+// 		pro.fs.mkdirSync('./public/json/sites');
+// 	}
+	
+// 	// filter
+// 	var site = request.body.site;
+// 	//site.urlEncoded = encodeUri
+	
+// 	// site
+// 	var sid = pro.fun.url_uid(request.body.site.url);
+// 	pro.console.log('post site: ' + encodeURIComponent(request.body.site.url));
+// 	var file = process.fs.writeFile(
+// 		'./public/json/sites/' + sid + '.json',
+// 		JSON.stringify(site),
+// 		'utf8',
+// 		function(error) {
+// 			// response: error
+// 			if (error) {
+// 				process.response.json(response, {
+// 					status: 'error',
+// 					message: "Couldn't write file .json"
+// 				});
+// 				return false;
+// 			}
+// 			// response: success
+// 			process.response.json(response, {});
+// 		}
+// 	);
+
+// 	// sites
+// 	model.contentful.sites[site.url] = site;
+// 	var file = process.fs.writeFile(
+// 		'./public/json/sites.json',
+// 		JSON.stringify(model.contentful.sites),
+// 		'utf8',
+// 		function(error) {
+// 			if (error) {
+// 				process.console.error("Couldn't write file ./public/json/sites.json");
+// 				return false;
+// 			}
+// 		}
+// 	);
+// });
+
+
+// //////////////////////////////////////////////////////////////////////////////////////////////////
+// // GET SITE
+// process.app.get('/site', function(request, response) {
+// 	// validate
+// 	if (!request.query.url || request.query.url.indexOf('http') !== 0) {
+// 		// fail
+// 		var error = {
+// 			code: 511,
+// 			message: 'GET /site requires ?url=http://...'
+// 		}
+// 		process.console.warn(error.message);
+// 		process.response.json(response, error);
+// 		return false;
+// 	}
+// 	if (!pro.fs.existsSync('./public/json/sites')) {
+// 		pro.fs.mkdirSync('./public/json/sites');
+// 	}
+// 	// get
+// 	var sid = pro.fun.url_uid(request.query.url);
+// 	pro.console.log('get site: ' + request.query.url);
+// 	pro.fs.readFile('./public/json/sites/' + sid + '.json', 'utf8', function(error, site) {
+// 		if (site) {
+// 			// response: success
+// 			process.response.json(response, JSON.parse(site));
+// 		} else {
+// 			// response: error
+// 			process.response.json(response, {
+// 				status: 'error',
+// 				message: "Couldn't find site file .json"
+// 			});
+// 			return false;
+// 		}
+// 	});
+// });
 
 
 // ////////////////////////////////////////////////////////////////////////////////////////////////////
