@@ -11,9 +11,6 @@ pro.q = require('q');
 pro._ = require('underscore');
 //pro.contentful = require('contentful');
 //pro.mkdirp = require('mkdirp');
-pro.mongoose = require('mongoose');
-// db
-pro.db = pro.mongoose.connect('mongodb://localhost/api');
 // env
 pro.env.PORT = 1080;
 pro.env.PATH = __dirname;
@@ -59,30 +56,14 @@ pro.secret = require('../secret-nyc/all.js');
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // MODEL
-process.schema = {};
-process.schema.site = process.db.Schema({
+pro.mongoose = require('mongoose');
+pro.mongoose.connect('mongodb://localhost/api');
+pro.schemas = {};
+pro.schemas.site = { 
 	url: String
-});
-process.model = {};
-process.model.site = process.db.model('site',pro.schema.site);
-
-
-var db = pro.mongoose.connection;
-db.on('error', console.error.bind(console, 'connection error:'));
-db.once('open', function() {
-	
-	process.model.site.find(function(err,results) {
-		if (err) {
-			return process.console.error(err);
-		}
-		process.console.trace(results);
-	});
-
-});
-
-setTimeout(function(){
-	process.exit();
-},1500);
+};
+pro.models = {};
+pro.models.site = pro.mongoose.model('Site', pro.schemas.site);
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -155,12 +136,16 @@ process.app.all('/hook/contentful', function(request, response) {
 // GET SITES
 process.app.get('/sites', function(request, response) {
 	process.console.log('get /sites');
-	if (view.sites) {
-		response.setHeader('Content-Type', 'application/json');
-		response.writeHead(200);
-		response.write(JSON.stringify(view.sites));
-		response.end();
-	}
+	pro.models.site.find(function(err,sites) {
+		if (err) {
+			return process.console.error(err);
+		} else {
+			response.setHeader('Content-Type', 'application/json');
+			response.writeHead(200);
+			response.write(JSON.stringify(sites));
+			response.end();
+		}
+	});
 });
 process.app.get('/categories', function(request, response) {
 	process.console.log('get /categories');
