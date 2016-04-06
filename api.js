@@ -9,7 +9,7 @@ pro.request = require('request');
 pro.fs = require('fs');
 pro.q = require('q');
 pro._ = require('underscore');
-//pro.contentful = require('contentful');
+pro.contentful = require('contentful');
 //pro.mkdirp = require('mkdirp');
 // env
 pro.env.PORT = 1080;
@@ -30,105 +30,88 @@ pro.console = require("./node_custom/console.js").console; // uses pro.app
 pro.response = require("./node_custom/response.js");
 // secret
 pro.secret = require('../secret-nyc/all.js');
-// // contentful
-// process.contentful.myClient = pro.contentful.createClient({
-//   space: 'whctzlb9j9p2',
-//   accessToken: '2275b86b0346a8f71ac2d012c153c7e50281f9c13f4d71af7d543a8557889ba3'
-//   // ,secure: true
-//   // ,host: 'cdn.contentful.com'
-//   // ,resolveLinks: true
-//   // agent: agentInstance
-// });
-// process.contentful.myEntries = function(entries){
-// 	for (var index in entries) {
-// 		if (entries[index].sys && entries[index].fields) {
-// 			entries[index] = entries[index].fields;
-// 			for (var field in entries[index]) {
-// 				if (typeof entries[index][field] == 'object') {
-// 					entries[index][field] = process.contentful.myEntries(entries[index][field]);
-// 				}
-// 			}
-// 		}
-// 	}
-// 	return entries;
-// };
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-// MODEL
+// contentful (sites)
+process.contentful.myClient = pro.contentful.createClient({
+  space: 'whctzlb9j9p2',
+  accessToken: '2275b86b0346a8f71ac2d012c153c7e50281f9c13f4d71af7d543a8557889ba3'
+  // ,secure: true
+  // ,host: 'cdn.contentful.com'
+  // ,resolveLinks: true
+  // agent: agentInstance
+});
+// mongoose (items)
 pro.mongoose = require('mongoose');
 pro.mongoose.connect('mongodb://localhost/api');
-pro.schemas = {};
-pro.schemas.site = { 
-	url: String
-};
-pro.models = {};
-pro.models.site = pro.mongoose.model('Site', pro.schemas.site);
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-// VIEW
-var view = {};
-// // sites
-// view.getContent = function(item,items){ // contentful content_type , file and variable name plural.json
-// 	view[items] = {};
-	
-// 	pro.contentful.myClient.entries({ content_type: item })
-// 	.then(function(items_new) {
-// 		// cloud
-// 		items_new = process.contentful.myEntries(items_new, undefined, item); // from contentful
-// 		// file
-// 		pro.fs.readFile('./public/json/'+items+'.json', 'utf8', function(error, items_old) {
-// 			// readFile
-// 			items_old = JSON.parse(items_old)||{}; // from file
-// 			// memory
-// 			if (items_new) {
-// 				for (var si in items_new) {
-// 					if (items_old[si]) {
-// 						view[items][si] = pro._.extend(items_old[si],items_new[si]);
-// 					} else {
-// 						view[items][si] = items_new[si];
-// 					}
-// 					// site only
-// 					if (item=='site') {
-// 						view[items][si].host = view[items][si].url.match(/(^https?:\/\/[a-z.-]*[a-z]*)/)[1];
-// 						view[items][si].link = view[items][si].url.replace(/{{date:([\w-\/.:\[\]\ ]*)}}/g, function(match, one) {
-// 							return pro.moment.now.format(one);
-// 						});
-// 					}
-// 				}
-// 				// writeFile
-// 				if (!pro.fs.existsSync('./public/json')) {
-// 					pro.fs.mkdirSync('./public/json');
-// 				}
-// 				process.console.info(view[items]);
-// 				var file = process.fs.writeFile(
-// 					'./public/json/'+items+'.json',
-// 					JSON.stringify(view[items]),
-// 					'utf8',
-// 					function(error) {
-// 						if (error) {
-// 							process.console.error('Couldn not write file ./public/json/'+items+'.json');
-// 							return false;
-// 						}
-// 					}
-// 				);
-// 			}
-// 		});
-// 	});
-// };
-// view.getContent('site','sites');
-// view.getContent('category','categories');
+////////////////////////////////////////////////////////////////////////////////////////////////////
+// MODEL
+var model = {};
+// contentful
+model.contentful = {};
+model.contentful.myEntries = function(entries){
+	for (var index in entries) {
+		if (entries[index].sys && entries[index].fields) {
+			entries[index] = entries[index].fields;
+			for (var field in entries[index]) {
+				if (typeof entries[index][field] == 'object') {
+					entries[index][field] = model.contentful.myEntries(entries[index][field]);
+				}
+			}
+		}
+	}
+	return entries;
+};
+model.contentful.getContent = function(item,items){ 
+	// gets {{item}}, saves to global variable view[{{items}}]
+	view[items] = {};
+	pro.contentful.myClient.entries({ content_type: item })
+	.then(function(items_new) {
+		items_new = model.contentful.myEntries(items_new, undefined, item); // from contentful
+		if (items_new) {
+			for (var si in items_new) {
+				// memory
+				view[items][si] = items_new[si];
+				// tweak
+				if (item=='site') {
+					view[items][si].host = view[items][si].url.match(/(^https?:\/\/[a-z.-]*[a-z]*)/)[1];
+					view[items][si].link = view[items][si].url.replace(/{{date:([\w-\/.:\[\]\ ]*)}}/g, function(match, one) {
+						return pro.moment.now.format(one);
+					});
+				}
+			}
+		}
+	});
+};
+// mongoose
+model.mongoose = {};
+model.mongoose.schemas = {};
+model.mongoose.schemas.item = { 
+	url: String
+};
+model.mongoose.getContent = function() {
+	view.items = pro.mongoose.model('Item', model.mongoose.schemas.item);
+};
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-// CONTENFUL
+// VIEW
+var view = {};
+// view.sites
+model.contentful.getContent('site','sites');
+model.contentful.getContent('category','categories');
+model.contentful.getContent('scene','scenes');
 process.app.all('/hook/contentful', function(request, response) {
 	process.console.warn('/hook/contentful');
-	view.getContent('site','sites');
-	view.getContent('category','categories');
+	model.contentful.getContent('site','sites');
+	model.contentful.getContent('category','categories');
+	model.contentful.getContent('scene','scenes');
 });
+// view.items
+// not in memory, query model.items.find({},callback);
+
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -136,23 +119,30 @@ process.app.all('/hook/contentful', function(request, response) {
 // GET SITES
 process.app.get('/sites', function(request, response) {
 	process.console.log('get /sites');
-	pro.models.site.find(function(err,sites) {
-		if (err) {
-			return process.console.error(err);
-		} else {
-			response.setHeader('Content-Type', 'application/json');
-			response.writeHead(200);
-			response.write(JSON.stringify(sites));
-			response.end();
-		}
-	});
+	var all = {};
+		all.sites = view.sites || {};
+		all.categories = view.categories || {};
+		all.scenes = view.scenes || {};
+	response.setHeader('Content-Type', 'application/json');
+	response.writeHead(200);
+	response.write(JSON.stringify({data:all, error:0},null,"\t"));
+	response.end();
 });
 process.app.get('/categories', function(request, response) {
 	process.console.log('get /categories');
-	if (view.categories) {
+	if (model.contentful.categories) {
 		response.setHeader('Content-Type', 'application/json');
 		response.writeHead(200);
-		response.write(JSON.stringify(view.categories));
+		response.write(JSON.stringify({data:model.contentful.categories, error:0}));
+		response.end();
+	}
+});
+process.app.get('/scenes', function(request, response) {
+	process.console.log('get /scenes');
+	if (model.contentful.scenes) {
+		response.setHeader('Content-Type', 'application/json');
+		response.writeHead(200);
+		response.write(JSON.stringify({data:model.contentful.scenes, error:0}));
 		response.end();
 	}
 });
@@ -203,10 +193,10 @@ process.app.post('/site', function(request, response) {
 	);
 
 	// sites
-	view.sites[site.url] = site;
+	model.contentful.sites[site.url] = site;
 	var file = process.fs.writeFile(
 		'./public/json/sites.json',
-		JSON.stringify(view.sites),
+		JSON.stringify(model.contentful.sites),
 		'utf8',
 		function(error) {
 			if (error) {
