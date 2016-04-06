@@ -144,14 +144,15 @@ process.app.get('/sites', function(request, response) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // GET ITEMS
 process.app.get('/items', function(request, response) {
-	var items;
 	model.mongoose.item.find(function(err, items){
 		if (err) {
 			return pro.console.warn(err);
 		} else {
+			var all = {};
+				all.items = items;
 			response.setHeader('Content-Type', 'application/json');
 			response.writeHead(200);
-			response.write(JSON.stringify({data:items, error:0},null,"\t"));
+			response.write(JSON.stringify({data:all, error:0},null,"\t"));
 			response.end();
 		}
 	});
