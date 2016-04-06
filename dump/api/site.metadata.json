@@ -1,0 +1,1 @@
+{ "options" : { "create" : "site" }, "indexes" : [ { "v" : 1, "key" : { "_id" : 1 }, "ns" : "api.site", "name" : "_id_" } ] }
