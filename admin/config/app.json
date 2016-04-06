@@ -1,6 +1,5 @@
 {
 	"app": {
-		"host": "localhost",
 		"docs_per_page": 500,
 		"port": 9099
 	}
