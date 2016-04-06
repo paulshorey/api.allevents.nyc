@@ -90,12 +90,14 @@ model.mongoose.schemas = {};
 model.mongoose.schemas.item = { 
 	_id: String,
 	text: { type:String, required: true },
-	timestamp: { type:Number, required: true },
+	time: { type:Number, required: true },
 	img: String,
 	link: String,
 	categories: { type:Array, default: [] },
 	scenes: { type:Array, default: [] },
 	venue: String,
+	timeAdded: { type:Number, default: Date.now() },
+	likes: { type:Number, default: 0 },
 	site: { 
 		link: { type:String, default: '' },
 		title: { type:String, default: '' }
@@ -143,27 +145,57 @@ process.app.get('/sites', function(request, response) {
 //////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // GET ITEMS
+// process.app.get('/items', function(request, response) {
+	
+// 	model.mongoose.item.find(function(err, items){
+// 		if (err) {
+// 			return pro.console.warn(err);
+// 		} else {
+// 			var all = {};
+// 				all.items = items;
+// 			response.setHeader('Content-Type', 'application/json');
+// 			response.writeHead(200);
+// 			response.write(JSON.stringify({data:all, error:0},null,"\t"));
+// 			response.end();
+// 		}
+// 	});
+// });
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////
+// POST ITEMS
 process.app.get('/items', function(request, response) {
-	model.mongoose.item.find(function(err, items){
+	
+	var item = {};
+		item.time = Date.now();
+		item.text = 'Text '+item.time;
+		item._id = 'id'+item.time;
+	model.mongoose.item.create(item, function (err, item) {
 		if (err) {
 			return pro.console.warn(err);
 		} else {
-			var all = {};
-				all.items = items;
-			response.setHeader('Content-Type', 'application/json');
-			response.writeHead(200);
-			response.write(JSON.stringify({data:all, error:0},null,"\t"));
-			response.end();
+			pro.console.log('created item');
+			pro.console.log(item);
+
+			model.mongoose.item.find(function(err, items){
+				if (err) {
+					return pro.console.warn(err);
+				} else {
+					var all = {};
+						all.items = items;
+					response.setHeader('Content-Type', 'application/json');
+					response.writeHead(200);
+					response.write(JSON.stringify({data:all, error:0},null,"\t"));
+					response.end();
+				}
+			});
+
+
+
 		}
 	});
-	// model.mongoose.item.create({ _id: Date.now() }, function (err, item) {
-	// 	if (err) {
-	// 		return pro.console.warn(err);
-	// 	} else {
-	// 		pro.console.log('created item');
-	// 		pro.console.log(item);
-	// 	}
-	// });
+
 });
 
 
