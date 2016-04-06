@@ -32,8 +32,8 @@ pro.response = require("./node_custom/response.js");
 pro.secret = require('../secret-nyc/all.js');
 // contentful (sites)
 process.contentful.myClient = pro.contentful.createClient({
-  space: 'whctzlb9j9p2',
-  accessToken: '2275b86b0346a8f71ac2d012c153c7e50281f9c13f4d71af7d543a8557889ba3'
+  space: pro.secret.contentful_delivery.space,
+  accessToken: pro.secret.contentful_delivery.access_token
   // ,secure: true
   // ,host: 'cdn.contentful.com'
   // ,resolveLinks: true
@@ -145,27 +145,27 @@ process.app.get('/sites', function(request, response) {
 //////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // GET ITEMS
-// process.app.get('/items', function(request, response) {
+process.app.get('/items', function(request, response) {
 	
-// 	model.mongoose.item.find(function(err, items){
-// 		if (err) {
-// 			return pro.console.warn(err);
-// 		} else {
-// 			var all = {};
-// 				all.items = items;
-// 			response.setHeader('Content-Type', 'application/json');
-// 			response.writeHead(200);
-// 			response.write(JSON.stringify({data:all, error:0},null,"\t"));
-// 			response.end();
-// 		}
-// 	});
-// });
+	model.mongoose.item.find(function(err, items){
+		if (err) {
+			return pro.console.warn(err);
+		} else {
+			var all = {};
+				all.items = items;
+			response.setHeader('Content-Type', 'application/json');
+			response.writeHead(200);
+			response.write(JSON.stringify({data:all, error:0},null,"\t"));
+			response.end();
+		}
+	});
+});
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // POST ITEMS
-process.app.get('/items', function(request, response) {
+process.app.post('/items', function(request, response) {
 	
 	var item = {};
 		item.time = Date.now();
@@ -177,22 +177,6 @@ process.app.get('/items', function(request, response) {
 		} else {
 			pro.console.log('created item');
 			pro.console.log(item);
-
-			model.mongoose.item.find(function(err, items){
-				if (err) {
-					return pro.console.warn(err);
-				} else {
-					var all = {};
-						all.items = items;
-					response.setHeader('Content-Type', 'application/json');
-					response.writeHead(200);
-					response.write(JSON.stringify({data:all, error:0},null,"\t"));
-					response.end();
-				}
-			});
-
-
-
 		}
 	});
 
