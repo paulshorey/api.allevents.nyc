@@ -185,7 +185,7 @@ process.app.post('/items', function(request, response) {
 		}
 		response.setHeader('Content-Type', 'application/json');
 		response.writeHead(200);
-		response.write('');
+		response.write('{"data":"","error":0}');
 		response.end();
 	});
 
