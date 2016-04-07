@@ -96,6 +96,7 @@ model.mongoose.schemas.item = {
 	categories: { type:Array, default: [] },
 	scenes: { type:Array, default: [] },
 	venue: String,
+	source: String,
 	timeAdded: { type:Number, default: Date.now() },
 	likes: { type:Number, default: 0 },
 	site: { 
@@ -115,11 +116,15 @@ var view = {};
 model.contentful.getContent('site','sites');
 model.contentful.getContent('category','categories');
 model.contentful.getContent('scene','scenes');
-process.app.all('/hook/contentful', function(request, response) {
+process.app.all('/_hook/contentful', function(request, response) {
 	process.console.warn('/hook/contentful');
 	model.contentful.getContent('site','sites');
 	model.contentful.getContent('category','categories');
 	model.contentful.getContent('scene','scenes');
+	response.setHeader('Content-Type', 'application/json');
+	response.writeHead(200);
+	response.write('');
+	response.end();
 });
 // view.items
 // not in memory, query model.mongoose.item.find({},callback);
@@ -179,6 +184,10 @@ process.app.post('/items', function(request, response) {
 			pro.console.log(item);
 		}
 	});
+	// response.setHeader('Content-Type', 'application/json');
+	// response.writeHead(200);
+	// response.write('');
+	// response.end();
 
 });
 
