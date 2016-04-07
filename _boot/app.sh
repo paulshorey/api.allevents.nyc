@@ -5,7 +5,7 @@ cd /www/api-nyc
 i=0;
 while true; do
 	i=$[$i+1]
-	echo casperjs api.js \#$i starting...
+	echo node api.js \#$i starting...
 	node api.js --iteration=$i
 	sleep 60
 done

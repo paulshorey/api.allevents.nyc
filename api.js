@@ -183,11 +183,11 @@ process.app.post('/items', function(request, response) {
 			pro.console.log('created item');
 			pro.console.log(item);
 		}
+		response.setHeader('Content-Type', 'application/json');
+		response.writeHead(200);
+		response.write('');
+		response.end();
 	});
-	// response.setHeader('Content-Type', 'application/json');
-	// response.writeHead(200);
-	// response.write('');
-	// response.end();
 
 });
 
