@@ -176,7 +176,7 @@ process.app.get('/items', function(request, response) {
 		} else {
 			var all = {};
 				all.items = items;
-			response.setHeader('Content-Type', 'application/json');
+			response.setHeader('Content-Type', 'application/json'); 
 			response.writeHead(200);
 			response.write(JSON.stringify({data:all, error:0},null,"\t"));
 			response.end();
