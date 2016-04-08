@@ -144,7 +144,7 @@ process.app.all('/_hook/contentful', function(request, response) {
 //////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // GET SITES
-process.app.get('/sites', function(request, response) {
+process.app.get('/all', function(request, response) {
 	process.console.log('get /sites');
 	var all = {};
 		all.sites = view.sites || {};
@@ -153,6 +153,13 @@ process.app.get('/sites', function(request, response) {
 	response.setHeader('Content-Type', 'application/json');
 	response.writeHead(200);
 	response.write(JSON.stringify({data:all, error:0},null,"\t"));
+	response.end();
+});
+process.app.get('/sites', function(request, response) {
+	process.console.log('get /sites');
+	response.setHeader('Content-Type', 'application/json');
+	response.writeHead(200);
+	response.write(JSON.stringify({data:view.sites, error:0},null,"\t"));
 	response.end();
 });
 
