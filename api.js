@@ -1,47 +1,47 @@
 var pro = process;
-pro.inc = {};
-pro.inc.express = require('express');
-pro.inc.express_parser = require('body-parser');
+process.inc = {};
+process.inc.express = require('express');
+process.inc.express_parser = require('body-parser');
 // modules
-pro.moment = require('moment'); // pro.moment(new Date(2011, 9, 16)).
-pro.moment.now = pro.moment();
-pro.request = require('request');
-pro.fs = require('fs');
-pro.q = require('q');
-pro._ = require('underscore');
-pro.contentful = require('contentful');
-//pro.mkdirp = require('mkdirp');
+process.moment = require('moment'); // process.moment(new Date(2011, 9, 16)).
+process.moment.now = process.moment();
+process.request = require('request');
+process.fs = require('fs');
+process.q = require('q');
+process._ = require('underscore');
+process.contentful = require('contentful');
+//process.mkdirp = require('mkdirp');
 // env
-pro.env.PORT = 1080;
-pro.env.PATH = __dirname;
+process.env.PORT = 1080;
+process.env.PATH = __dirname;
 // app
-pro.app = pro.inc.express();
-pro.app.use(pro.inc.express_parser.json({
+process.app = process.inc.express();
+process.app.use(process.inc.express_parser.json({
 	limit: '50mb'
 }));
-pro.app.use(pro.inc.express_parser.urlencoded({
+process.app.use(process.inc.express_parser.urlencoded({
 	limit: '50mb',
 	extended: true
 }));
-pro.app.use(pro.inc.express.static('public'));
+process.app.use(process.inc.express.static('public'));
 // custom
-pro.fun = require("./node_custom/fun.js");
-pro.console = require("./node_custom/console.js").console; // uses pro.app
-pro.response = require("./node_custom/response.js");
+process.fun = require("./node_custom/fun.js");
+process.console = require("./node_custom/console.js").console; // uses process.app
+process.response = require("./node_custom/response.js");
 // secret
-pro.secret = require('../secret-nyc/all.js');
+process.secret = require('../secret-nyc/all.js');
 // contentful (sites)
-process.contentful.myClient = pro.contentful.createClient({
-  space: pro.secret.contentful_delivery.space,
-  accessToken: pro.secret.contentful_delivery.access_token
+process.contentful.myClient = process.contentful.createClient({
+  space: process.secret.contentful_delivery.space,
+  accessToken: process.secret.contentful_delivery.access_token
   // ,secure: true
   // ,host: 'cdn.contentful.com'
   // ,resolveLinks: true
   // agent: agentInstance
 });
 // mongoose (items)
-pro.mongoose = require('mongoose');
-pro.mongoose.connect('mongodb://localhost/api');
+process.mongoose = require('mongoose');
+process.mongoose.connect('mongodb://localhost/api');
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -66,7 +66,7 @@ model.contentful.myEntries = function(entries){
 model.contentful.getContent = function(item,items){ 
 	// gets {{item}}, saves to global variable view[{{items}}]
 	view[items] = {};
-	pro.contentful.myClient.entries({ content_type: item })
+	process.contentful.myClient.entries({ content_type: item })
 	.then(function(items_new) {
 		items_new = model.contentful.myEntries(items_new, undefined, item); // from contentful
 		if (items_new) {
@@ -77,7 +77,7 @@ model.contentful.getContent = function(item,items){
 				if (item=='site') {
 					view[items][si].host = view[items][si].url.match(/(^https?:\/\/[a-z.-]*[a-z]*)/)[1];
 					view[items][si].link = view[items][si].url.replace(/{{date:([\w-\/.:\[\]\ ]*)}}/g, function(match, one) {
-						return pro.moment.now.format(one);
+						return process.moment.now.format(one);
 					});
 				}
 			}
@@ -105,7 +105,7 @@ model.mongoose.schemas.item = {
 	}
 
 };
-model.mongoose.item = pro.mongoose.model('Item', model.mongoose.schemas.item);
+model.mongoose.item = process.mongoose.model('Item', model.mongoose.schemas.item);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -172,7 +172,7 @@ process.app.get('/items', function(request, response) {
 	
 	model.mongoose.item.find(function(err, items){
 		if (err) {
-			return pro.console.warn(err);
+			return process.console.warn(err);
 		} else {
 			var all = {};
 				all.items = items;
@@ -189,22 +189,22 @@ process.app.get('/items', function(request, response) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // POST ITEMS
 process.app.post('/items', function(request, response) {
-	process.console.info('post /items');
-	process.console.log(request.body);
 	
 	for (var it in request.body.items) {
 		var item = request.body.items[it];
-		model.mongoose.item.create(item, function (err, item) {
+			item._id = 'id'+item.time;
+		model.mongoose.item.create(item, function (err, ite) {
 			if (err) {
-				return pro.console.warn(err);
+				process.console.error(err);
+				return false;
 			} else {
-				pro.console.log('created item');
-				pro.console.log(item);
+				process.console.log('created item');
+				process.console.log(ite);
 			}
-			response.setHeader('Content-Type', 'application/json');
-			response.writeHead(200);
-			response.write('{"data":"","error":0}');
-			response.end();
+			// response.setHeader('Content-Type', 'application/json');
+			// response.writeHead(200);
+			// response.write('{"data":"","error":0}');
+			// response.end();
 		});
 	}
 
@@ -225,8 +225,8 @@ process.app.post('/items', function(request, response) {
 // 		process.response.json(response, error);
 // 		return false;
 // 	}
-// 	if (!pro.fs.existsSync('./public/json/sites')) {
-// 		pro.fs.mkdirSync('./public/json/sites');
+// 	if (!process.fs.existsSync('./public/json/sites')) {
+// 		process.fs.mkdirSync('./public/json/sites');
 // 	}
 	
 // 	// filter
@@ -234,8 +234,8 @@ process.app.post('/items', function(request, response) {
 // 	//site.urlEncoded = encodeUri
 	
 // 	// site
-// 	var sid = pro.fun.url_uid(request.body.site.url);
-// 	pro.console.log('post site: ' + encodeURIComponent(request.body.site.url));
+// 	var sid = process.fun.url_uid(request.body.site.url);
+// 	process.console.log('post site: ' + encodeURIComponent(request.body.site.url));
 // 	var file = process.fs.writeFile(
 // 		'./public/json/sites/' + sid + '.json',
 // 		JSON.stringify(site),
@@ -284,13 +284,13 @@ process.app.post('/items', function(request, response) {
 // 		process.response.json(response, error);
 // 		return false;
 // 	}
-// 	if (!pro.fs.existsSync('./public/json/sites')) {
-// 		pro.fs.mkdirSync('./public/json/sites');
+// 	if (!process.fs.existsSync('./public/json/sites')) {
+// 		process.fs.mkdirSync('./public/json/sites');
 // 	}
 // 	// get
-// 	var sid = pro.fun.url_uid(request.query.url);
-// 	pro.console.log('get site: ' + request.query.url);
-// 	pro.fs.readFile('./public/json/sites/' + sid + '.json', 'utf8', function(error, site) {
+// 	var sid = process.fun.url_uid(request.query.url);
+// 	process.console.log('get site: ' + request.query.url);
+// 	process.fs.readFile('./public/json/sites/' + sid + '.json', 'utf8', function(error, site) {
 // 		if (site) {
 // 			// response: success
 // 			process.response.json(response, JSON.parse(site));
@@ -322,6 +322,6 @@ process.app.post('/items', function(request, response) {
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-process.app.listen(pro.env.PORT, function() {
-	process.console.log("Node app is running at localhost: " + pro.env.PORT);
+process.app.listen(process.env.PORT, function() {
+	process.console.log("Node app is running at localhost: " + process.env.PORT);
 });
