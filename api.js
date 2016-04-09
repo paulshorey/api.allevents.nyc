@@ -189,20 +189,16 @@ process.app.get('/items', function(request, response) {
 // POST ITEMS
 process.app.post('/items', function(request, response) {
 	process.console.log('post /items');
-	process.console.log(JSON.stringify(request.body.items));
 	
 	for (var it = 0; it < request.body.items.length; it++) {
 		var item = request.body.items[it];
-			item._id = process.fun.url_uid(item.text);
-		process.console.log(item);
+			item._id = process.fun.str_uid(item.time+item.text);
 		model.mongoose.item.create(item, function (err, data) {
 			if (err) {
 				process.console.error(err.errmsg);
 				return false;
-			} else {
-				process.console.info('created item');
-				process.console.info(data);
 			}
+			process.console.info(data);
 		});
 	}
 
@@ -233,7 +229,7 @@ process.app.post('/items', function(request, response) {
 // 	//site.urlEncoded = encodeUri
 	
 // 	// site
-// 	var sid = process.fun.url_uid(request.body.site.url);
+// 	var sid = process.fun.str_uid(request.body.site.url);
 // 	process.console.log('post site: ' + encodeURIComponent(request.body.site.url));
 // 	var file = process.fs.writeFile(
 // 		'./public/json/sites/' + sid + '.json',
@@ -287,7 +283,7 @@ process.app.post('/items', function(request, response) {
 // 		process.fs.mkdirSync('./public/json/sites');
 // 	}
 // 	// get
-// 	var sid = process.fun.url_uid(request.query.url);
+// 	var sid = process.fun.str_uid(request.query.url);
 // 	process.console.log('get site: ' + request.query.url);
 // 	process.fs.readFile('./public/json/sites/' + sid + '.json', 'utf8', function(error, site) {
 // 		if (site) {
