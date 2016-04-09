@@ -195,10 +195,10 @@ process.app.post('/items', function(request, response) {
 			item._id = process.fun.str_uid(item.time+item.text);
 		model.mongoose.item.create(item, function (err, data) {
 			if (err) {
-				process.console.error(err.errmsg);
+				process.console.error(err);
 				return false;
 			}
-			process.console.info(data);
+			process.console.info(data,null,'\t');
 		});
 	}
 
