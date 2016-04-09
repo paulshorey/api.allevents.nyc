@@ -140,7 +140,6 @@ process.app.all('/_hook/contentful', function(request, response) {
 // not in memory, query model.mongoose.item.find({},callback);
 
 
-
 //////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // GET SITES
@@ -189,26 +188,26 @@ process.app.get('/items', function(request, response) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // POST ITEMS
 process.app.post('/items', function(request, response) {
+	process.console.log('post /items');
+	process.console.log(JSON.stringify(request.body.items));
 	
-	for (var it in request.body.items) {
+	for (var it = 0; it < request.body.items.length; it++) {
 		var item = request.body.items[it];
-			item._id = 'id'+item.time;
-		model.mongoose.item.create(item, function (err, ite) {
+			item._id = process.fun.url_uid(item.text);
+		process.console.log(item);
+		model.mongoose.item.create(item, function (err, data) {
 			if (err) {
-				process.console.error(err);
+				process.console.error(err.errmsg);
 				return false;
 			} else {
-				process.console.log('created item');
-				process.console.log(ite);
+				process.console.info('created item');
+				process.console.info(data);
 			}
-			// response.setHeader('Content-Type', 'application/json');
-			// response.writeHead(200);
-			// response.write('{"data":"","error":0}');
-			// response.end();
 		});
 	}
 
 });
+
 
 // //////////////////////////////////////////////////////////////////////////////////////////////////
 // ////////////////////////////////////////////////////////////////////////////////////////////////////
