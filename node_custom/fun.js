@@ -12,7 +12,7 @@ exports.str_uid = function(str) {
 		hash = hash & hash; // Convert to 32bit integer
 	}
 	// ok
-	return str.substr(0,20) + hash;
+	return str.substr(0,40) + hash;
 };
 
 exports.random_uid = function(length) {
