@@ -82,6 +82,8 @@ model.contentful.getContent = function(item,items){
 				}
 			}
 		}
+		// done
+		process.console.info(''+(items_new.length||0)+' '+items);
 	});
 };
 // mongoose
