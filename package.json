@@ -14,6 +14,7 @@
     "mkdirp": "^0.5.1",
     "moment": "latest",
     "mongoose": "^4.4.11",
+    "multer": "^1.1.0",
     "q": "latest",
     "request": "latest",
     "serve-static": "latest",
