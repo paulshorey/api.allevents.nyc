@@ -40,18 +40,13 @@ exports.to_query_string = function(obj) {
 	return parts.join("&");
 };
 
-exports.addslashes = function(str) {
-	// str = str.replace(/\\/g, '\\\\');
-	// str = str.replace(/\'/g, '\\\'');
-	// str = str.replace(/\"/g, '\\"');
-	// str = str.replace(/\0/g, '\\0');
+exports.trim = function(str){
+	str = str.replace(/(^[^a-zA-Z0-9]*)|([^a-zA-Z0-9]*$)/g, '');
 	return str;
 };
 
-exports.stripslashes = function(str) {
-	// str = str.replace(/\\'/g, '\'');
-	// str = str.replace(/\\"/g, '"');
-	// str = str.replace(/\\0/g, '\0');
-	// str = str.replace(/\\\\/g, '\\');
-	return str;
+exports.pad = function(str) {
+	str = str.toString();
+	var strlen = str.length || 1;
+	return (strlen < 2 ? "0" + str : str);
 };
