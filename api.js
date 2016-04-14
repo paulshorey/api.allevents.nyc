@@ -76,8 +76,14 @@ model.contentful.getContent = function(item,items){
 				// tweak
 				if (item=='site') {
 					view[items][si].host = view[items][si].url.match(/(^https?:\/\/[a-z.-]*[a-z]*)/)[1];
-					view[items][si].link = view[items][si].url.replace(/{{date:([\w-\/.:\[\]\ ]*)}}/g, function(match, one) {
-						return process.moment.now.format(one);
+					view[items][si].link = view[items][si].url.replace(/{{([^}]*)}}/g, function(match, string) {
+						var now = Date.now();
+						var plus = string.split('+');
+						string = plus[0];
+						if (plus[1]) {
+							now += parseInt(plus[1]);
+						}
+						return process.moment(now).format(string);
 					});
 				}
 			}
