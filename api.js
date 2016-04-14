@@ -84,6 +84,9 @@ model.contentful.getContent = function(item,items){
 		}
 		// done
 		process.console.info(''+(items_new.length||0)+' '+items);
+		if (item=='site') {
+			process.console.info(JSON.stringify(items_new));
+		}
 	});
 };
 // mongoose
