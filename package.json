@@ -6,6 +6,10 @@
   "scripts": {
     "preinstall": "npm i -g gulp"
   },
+  "scripts": {
+    "api": "node api.js",
+    "admin": "cd admin;node app.js"
+  },
   "dependencies": {
     "body-parser": "latest",
     "colors": "latest",

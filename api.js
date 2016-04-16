@@ -185,6 +185,10 @@ process.app.get('/items*', function(request, response) {
 	for (var q in request.query) {
 		query[q] = new RegExp(request.query[q],'i');
 	}
+	if (query['text']) {
+		delete query['text'];
+		query['$text'] = {$search:request.query.text};
+	}
 	process.console.log('query  '+JSON.stringify(query));
 	model.mongoose.item.find(query)
 	.exec(function(err, items){
