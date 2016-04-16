@@ -205,10 +205,11 @@ process.app.post('/items', function(request, response) {
 	
 	for (var it = 0; it < request.body.items.length; it++) {
 		var item = request.body.items[it];
-		item._id = process.fun.str_uid(item.time+item.text);
-		process.console.info(JSON.stringify(item,null,'\t'));
+		var query = {};
+		query._id = process.fun.str_uid(item.time+item.text);
+		process.console.info(JSON.stringify(query,null,'\t'));
 		delete item.site;
-		model.mongoose.item.findOneAndUpdate({_id:item._id}, item, {upsert:true, setDefaultsOnInsert:true}, function (err, data) {
+		model.mongoose.item.update(query, item, {upsert:true}, function (err, data) {
 			if (err) {
 				process.console.error(err);
 				return false;
