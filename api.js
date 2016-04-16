@@ -104,10 +104,10 @@ model.mongoose.schemas.item = {
 	_id: String,
 	text: { type:String, required: true },
 	time: { type:Number, required: true },
-	img: String,
+	image: String,
 	link: String,
-	categories: { type:String, default: '' },
-	scenes: { type:String, default: '' },
+	category: { type:String, default: '' },
+	scene: { type:String, default: '' },
 	venue: String,
 	timeAdded: { type:Number, default: Date.now() },
 	likes: { type:Number, default: 0 },
@@ -179,10 +179,15 @@ process.app.get('/sites', function(request, response) {
 //////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // GET ITEMS
-process.app.get('/items', function(request, response) {
-	process.console.log('get /items');
-	
-	model.mongoose.item.find(function(err, items){
+process.app.get('/items*', function(request, response) {
+	process.console.log('get /items  '+JSON.stringify(request.query));
+	var query = {};
+	for (var q in request.query) {
+		query[q] = new RegExp(request.query[q],'i');
+	}
+	process.console.log('query  '+JSON.stringify(query));
+	model.mongoose.item.find(query)
+	.exec(function(err, items){
 		if (err) {
 			return process.console.warn(err);
 		} else {
