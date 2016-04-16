@@ -7,9 +7,9 @@ git reset HEAD -\-hard;
 git pull
 
 i=0;
-while true; do
-	i=$[$i+1]
-	echo node api.js \#$i starting...
-	node api.js --iteration=$i
-	sleep 60
-done
+# while true; do
+# 	i=$[$i+1]
+# 	echo node api.js \#$i starting...
+# 	node api.js --iteration=$i
+# 	sleep 60
+# done
