@@ -83,6 +83,8 @@ model.contentful.getContent = function(item,items){
 						if (plus[1]) {
 							now += parseInt(plus[1]);
 						}
+						process.console.warn(string);
+						process.console.warn(JSON.stringify(plus));
 						return process.moment(now).format(string);
 					});
 				}
@@ -104,16 +106,16 @@ model.mongoose.schemas.item = {
 	time: { type:Number, required: true },
 	img: String,
 	link: String,
-	categories: { type:Array, default: [] },
-	scenes: { type:Array, default: [] },
+	categories: { type:String, default: '' },
+	scenes: { type:String, default: '' },
 	venue: String,
-	source: String,
 	timeAdded: { type:Number, default: Date.now() },
 	likes: { type:Number, default: 0 },
-	site: { 
-		link: { type:String, default: '' },
-		title: { type:String, default: '' }
-	}
+	source: String,
+	source_host: { type:String, required: true },
+	source_link: { type:String, required: true },
+	source_title: { type:String, required: true },
+	site: Array
 
 };
 model.mongoose.item = process.mongoose.model('Item', model.mongoose.schemas.item);
@@ -203,6 +205,7 @@ process.app.post('/items', function(request, response) {
 	
 	for (var it = 0; it < request.body.items.length; it++) {
 		var item = request.body.items[it];
+		process.console.info(JSON.stringify(item,null,'\t'));
 		item._id = process.fun.str_uid(item.time+item.text);
 		delete item.site;
 		model.mongoose.item.update({_id:item._id}, item, {upsert:true, setDefaultsOnInsert:true}, function (err, data) {
