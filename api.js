@@ -179,8 +179,8 @@ process.app.get('/sites', function(request, response) {
 //////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // GET ITEMS
-process.app.get('/items*', function(request, response) {
-	process.console.log('get /items  '+JSON.stringify(request.query));
+process.app.get('/events*', function(request, response) {
+	process.console.log('get /events  '+JSON.stringify(request.query));
 	var query = {};
 	for (var q in request.query) {
 		query[q] = new RegExp(request.query[q],'i');
@@ -189,8 +189,11 @@ process.app.get('/items*', function(request, response) {
 		delete query['text'];
 		query['$text'] = {$search:request.query.text};
 	}
+	query['time'] = {$gt:Date.now()};
 	process.console.log('query  '+JSON.stringify(query));
-	model.mongoose.item.find(query)
+	model.mongoose.item
+	.find(query)
+	.sort({time:-1})
 	.exec(function(err, items){
 		if (err) {
 			return process.console.warn(err);
