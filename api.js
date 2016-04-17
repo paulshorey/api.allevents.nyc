@@ -198,8 +198,7 @@ process.app.get('/events*', function(request, response) {
 		if (err) {
 			return process.console.warn(err);
 		} else {
-			var all = {};
-				all.items = items;
+			var all = items;
 			response.setHeader('Content-Type', 'application/json'); 
 			response.writeHead(200);
 			response.write(JSON.stringify({data:all, error:0},null,"\t"));
