@@ -4,9 +4,6 @@
   "description": "My dev environment",
   "author": "Paul Shorey",
   "scripts": {
-    "preinstall": "npm i -g gulp"
-  },
-  "scripts": {
     "api": "node api.js",
     "admin": "cd admin;node app.js"
   },
@@ -14,6 +11,7 @@
     "body-parser": "latest",
     "colors": "latest",
     "contentful": "^2.1.2",
+    "cors": "^2.7.1",
     "express": "latest",
     "mkdirp": "^0.5.1",
     "moment": "latest",
@@ -23,7 +21,6 @@
     "request": "latest",
     "serve-static": "latest",
     "tracer": "latest",
-    "underscore": "latest",
     "url": "latest"
   },
   "devDependencies": {
