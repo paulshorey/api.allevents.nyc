@@ -185,6 +185,20 @@ process.app.get('/sites', function(request, response) {
 	response.write(JSON.stringify({data:view.sites, error:0},null,"\t"));
 	response.end();
 });
+process.app.get('/categories', function(request, response) {
+	process.console.log('get /categories');
+	response.setHeader('Content-Type', 'application/json');
+	response.writeHead(200);
+	response.write(JSON.stringify({data:view.categories, error:0},null,"\t"));
+	response.end();
+});
+process.app.get('/scenes', function(request, response) {
+	process.console.log('get /categories');
+	response.setHeader('Content-Type', 'application/json');
+	response.writeHead(200);
+	response.write(JSON.stringify({data:view.scenes, error:0},null,"\t"));
+	response.end();
+});
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////

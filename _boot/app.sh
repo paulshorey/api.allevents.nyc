@@ -6,7 +6,9 @@ cd /www/api-nyc
 git reset HEAD -\-hard;
 git pull
 
-i=0;
+node api.js
+
+# i=0;
 # while true; do
 # 	i=$[$i+1]
 # 	echo node api.js \#$i starting...
