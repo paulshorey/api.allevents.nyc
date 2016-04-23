@@ -207,14 +207,24 @@ process.app.get('/scenes', function(request, response) {
 process.app.get('/events*', function(request, response) {
 	process.console.log('get /events  '+JSON.stringify(request.query));
 	var query = {};
+	// first specials
+	if (request.query.text) {
+		delete request.query.text;
+		query.$text = {$search:request.query.text};
+	}
+	// then standards
 	for (var q in request.query) {
-		query[q] = new RegExp(request.query[q],'i');
+		// each column
+		query[q] = {$in:[]};
+		// each search term
+		var split = request.query[q].split(',').map(function(e){return e.trim();});
+		for (var s in split) {
+			query[q].$in.push( new RegExp(split[s],'i') );
+		}
 	}
-	if (query['text']) {
-		delete query['text'];
-		query['$text'] = {$search:request.query.text};
-	}
+	// finally requireds
 	query['time'] = {$gt:Date.now()};
+	// ok go
 	process.console.log('query  '+JSON.stringify(query));
 	model.mongoose.item
 	.find(query)
