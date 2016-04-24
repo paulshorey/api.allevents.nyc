@@ -3,7 +3,7 @@ process.inc = {};
 process.inc.express = require('express');
 process.inc.express_parser = require('body-parser');
 // modules
-process.moment = require('moment'); // process.moment(new Date(2011, 9, 16)).
+process.moment = require('moment-timezone'); // process.moment(new Date(2011, 9, 16)).
 process.moment.now = process.moment();
 process.request = require('request');
 process.fs = require('fs');
@@ -44,6 +44,38 @@ process.contentful.myClient = process.contentful.createClient({
 process.mongoose = require('mongoose');
 process.mongoose.connect('mongodb://localhost/api');
 
+// process.dt = new Date();
+// process.time_start = {};
+// process.time_end = {};
+// process.time_start.today = Date.now();
+// process.time_start.tomorrow = process.moment(new Date()).format(x);
+
+// process.time_start = function(when) {
+// 	if (when=='today') {
+// 		return Date.now();
+// 	} else if (when=='tomorrow') {
+// 		return Date.parse(1000* (newDate( 
+// 	}
+// };
+
+process.timestamp = new function() {
+	var timezone = 'America/New_York';
+	var moment = process.moment(new Date()).tz(timezone);
+	var DD = moment.format('DD');
+	var MM = moment.format('MM');
+	var YYYY = moment.format('YYYY');
+	var timestamp = Date.parse( new Date( YYYY, MM-1, DD ) );
+	this.now = function(){ return Date.now(); };
+	this.today_start = function(){ return timestamp +0; };
+	this.today_end = function(){ return timestamp +1*(24*60*60*1000) -1; };
+	this.tomorrow_start = function(){ return timestamp +1*(24*60*60*1000); };
+	this.tomorrow_end = function(){ return timestamp +2*(24*60*60*1000) -1; };
+	this.thisweek_start = function(){ return timestamp +1*(24*60*60*1000) -1; };
+	this.thisweek_end = function(){ return timestamp +7*(24*60*60*1000) -1; };
+	this.thismonth_end = function(){ return timestamp +31*(24*60*60*1000) -1; };
+	this.today = this.today_start;
+	this.tomorrow = this.tomorrow_start;
+}();
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -200,32 +232,53 @@ process.app.get('/scenes', function(request, response) {
 	response.end();
 });
 
+process.app.get('/time*', function(request, response) {
+	var when = (request.params[0] ? request.params[0].substr(1) : '');
+	response.setHeader('Content-Type', 'application/json'); 
+	response.writeHead(200);
+	response.write(JSON.stringify({data: process.timestamp[when||'now'](), error:0},null,"\t"));
+	response.end();
+});
+
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-// get items
-process.app.get('/events*', function(request, response) {
-	process.console.log('get /events  '+JSON.stringify(request.query));
+// get events
+process.app.all('/events*', function(request, response) {
+
+	var request_query = Object.keys(request.body).length ? request.body : request.query;
 	var query = {};
+
 	// first specials
-	if (request.query.text) {
-		delete request.query.text;
-		query.$text = {$search:request.query.text};
+	if (request_query.text) {
+		delete request_query.text;
+		query.$text = {$search:request_query.text};
 	}
+
 	// then standards
-	for (var q in request.query) {
-		// each column
-		query[q] = {$in:[]};
-		// each search term
-		var split = request.query[q].split(',').map(function(e){return e.trim();});
-		for (var s in split) {
-			query[q].$in.push( new RegExp(split[s],'i') );
+	for (var qk in request_query) {
+		if (qk.indexOf(['category','scene'])>-1){
+
+			// each column
+			query[qk] = {$in:[]};
+
+			// each search term
+			var split = request_query[qk].split(',').map(function(e){return e.trim();});
+			for (var sk in split) {
+				query[qk].$in.push( new RegExp(split[sk],'i') );
+			}
+
 		}
 	}
+
 	// finally requireds
 	query['time'] = {$gt:Date.now()};
+	if (request_query['time']=='today') {
+		query['time'] = {$gt:process.timestamp.today_start(),$lt:process.timestamp.today_end()};
+	}
+
 	// ok go
-	process.console.log('query  '+JSON.stringify(query));
+	process.console.log('get /events  '+JSON.stringify(query));
 	model.mongoose.item
 	.find(query)
 	.sort({time:-1})
@@ -233,13 +286,13 @@ process.app.get('/events*', function(request, response) {
 		if (err) {
 			return process.console.warn(err);
 		} else {
-			var all = items;
 			response.setHeader('Content-Type', 'application/json'); 
 			response.writeHead(200);
-			response.write(JSON.stringify({data:all, error:0},null,"\t"));
+			response.write(JSON.stringify({data:items, error:0},null,"\t"));
 			response.end();
 		}
 	});
+
 });
 
 
