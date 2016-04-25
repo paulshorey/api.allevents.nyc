@@ -9,14 +9,14 @@ process.request = require('request');
 process.fs = require('fs');
 process.q = require('q');
 process.contentful = require('contentful');
-// process.cors = require('cors');
+process.cors = require('cors');
 //process.mkdirp = require('mkdirp');
 // env
 process.env.PORT = 1080;
 process.env.PATH = __dirname;
 // app
 process.app = process.inc.express();
-// process.app.use(process.cors());
+process.app.use(process.cors());
 process.app.use(process.inc.express_parser.json({
 	limit: '50mb'
 }));
@@ -25,18 +25,6 @@ process.app.use(process.inc.express_parser.urlencoded({
 	extended: true
 }));
 process.app.use(process.inc.express.static('public'));
-process.app.use(function(req, res, next) {
-    res.header('Access-Control-Allow-Origin', '*');
-    res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
-    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With');
-    // intercept OPTIONS method
-    if ('OPTIONS' == req.method) {
-      res.send(200);
-    }
-    else {
-      next();
-    }
-});
 // custom
 process.fun = require("./node_custom/fun.js");
 process.console = require("./node_custom/console.js").console; // uses process.app
@@ -246,19 +234,6 @@ process.app.get('/time*', function(request, response) {
 //////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // get events
-
-process.app.options('*', function(request, response) {
-	console.warn('options');
-	res.header('Access-Control-Allow-Origin', '*');
-	res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
-	res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With');
-	// intercept OPTIONS method
-	if ('OPTIONS' == req.method) {
-		res.sendStatus(200);
-		res.end();
-	}
-});
-
 process.app.all('/events*', function(request, response) {
 	console.warn('/events');
 
