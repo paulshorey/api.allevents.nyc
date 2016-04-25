@@ -295,7 +295,7 @@ process.app.post('/items', function(request, response) {
 	for (var it = 0; it < request.body.items.length; it++) {
 		var item = request.body.items[it];
 		var query = {};
-		query._id = item.timestamp+process.fun.str_id(item.text);
+		query._id = item.timestamp+process.fun.hash_str(item.text);
 		process.console.info(JSON.stringify(query,null,'\t'));
 		delete item.site;
 		model.mongoose.item.update(query, item, {upsert:true}, function (err, data) {
