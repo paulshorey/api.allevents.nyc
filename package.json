@@ -22,7 +22,7 @@
     "request": "latest",
     "serve-static": "latest",
     "tracer": "latest",
-    "url": "latest"
+    "url": "^0.11.0"
   },
   "devDependencies": {
     "jshint": "latest",
