@@ -238,7 +238,7 @@ process.app.get('/time*', function(request, response) {
 process.app.all('/events*', function(request, response) {
 	process.console.warn('/events '+request.method);
 	if ('OPTIONS' == request.method) {
-		response.setHeader('Access-Control-Allow-Origin', 'allevents.nyc');
+		response.setHeader('Access-Control-Allow-Origin', 'app.allevents.nyc');
 		response.setHeader('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
 		response.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With');
 		response.writeHead(200);
