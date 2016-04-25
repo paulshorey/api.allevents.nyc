@@ -28,7 +28,7 @@ process.app = process.inc.express();
 	process.app.disable('trust proxy');
 	process.app.use(function(request, response, next){
 		var referrer = process.url.parse(request.headers.referer, true, true).hostname;
-		response.setHeader('Access-Control-Allow-Origin', referrer);
+		response.setHeader('Access-Control-Allow-Origin', '*');
 		response.setHeader('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
 		response.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With, X-Host');
 		if ('OPTIONS' == request.method) {
