@@ -7,3 +7,4 @@ out
 config
 public/console/logs*
 public/console/logs/*
+admin/.* #? .debugLog or something ?
