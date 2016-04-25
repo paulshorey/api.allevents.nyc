@@ -44,39 +44,6 @@ process.contentful.myClient = process.contentful.createClient({
 process.mongoose = require('mongoose');
 process.mongoose.connect('mongodb://localhost/api');
 
-// process.dt = new Date();
-// process.time_start = {};
-// process.time_end = {};
-// process.time_start.today = Date.now();
-// process.time_start.tomorrow = process.moment(new Date()).format(x);
-
-// process.time_start = function(when) {
-// 	if (when=='today') {
-// 		return Date.now();
-// 	} else if (when=='tomorrow') {
-// 		return Date.parse(1000* (newDate( 
-// 	}
-// };
-
-process.timestamp = new function() {
-	var timezone = 'America/New_York';
-	var moment = process.moment(new Date()).tz(timezone);
-	var DD = moment.format('DD');
-	var MM = moment.format('MM');
-	var YYYY = moment.format('YYYY');
-	var timestamp = Date.parse( new Date( YYYY, MM-1, DD ) );
-	this.now = function(){ return Date.now(); };
-	this.today_start = function(){ return timestamp +0; };
-	this.today_end = function(){ return timestamp +1*(24*60*60*1000) -1; };
-	this.tomorrow_start = function(){ return timestamp +1*(24*60*60*1000); };
-	this.tomorrow_end = function(){ return timestamp +2*(24*60*60*1000) -1; };
-	this.thisweek_start = function(){ return timestamp +1*(24*60*60*1000) -1; };
-	this.thisweek_end = function(){ return timestamp +7*(24*60*60*1000) -1; };
-	this.thismonth_end = function(){ return timestamp +31*(24*60*60*1000) -1; };
-	this.today = this.today_start;
-	this.tomorrow = this.tomorrow_start;
-}();
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // MODEL
@@ -136,14 +103,17 @@ model.mongoose.schemas = {};
 model.mongoose.schemas.item = { 
 	_id: String,
 	text: { type:String, required: true },
-	time: { type:Number, required: true },
+	timestamp: { type:Number, required: true },
 	image: String,
 	link: String,
 	category: { type:String, default: '' },
 	scene: { type:String, default: '' },
 	venue: String,
+	date: String,
+	time: String,
 	timeAdded: { type:Number, default: Date.now() },
 	likes: { type:Number, default: 0 },
+	random: { type:Number, default: 0 },
 	source: String,
 	source_host: { type:String, required: true },
 	source_link: { type:String, required: true },
@@ -152,6 +122,26 @@ model.mongoose.schemas.item = {
 
 };
 model.mongoose.item = process.mongoose.model('Item', model.mongoose.schemas.item);
+
+// time
+process.timestamp = new function() {
+	var timezone = 'America/New_York';
+	var moment = process.moment(new Date()).tz(timezone);
+	var DD = moment.format('DD');
+	var MM = moment.format('MM');
+	var YYYY = moment.format('YYYY');
+	var timestamp = Date.parse( new Date( YYYY, MM-1, DD ) );
+	this.now = function(){ return Date.now(); };
+	this.today_start = function(){ return timestamp +0; };
+	this.today_end = function(){ return timestamp +1*(24*60*60*1000) -1; };
+	this.tomorrow_start = function(){ return timestamp +1*(24*60*60*1000); };
+	this.tomorrow_end = function(){ return timestamp +2*(24*60*60*1000) -1; };
+	this.thisweek_start = function(){ return timestamp +1*(24*60*60*1000) -1; };
+	this.thisweek_end = function(){ return timestamp +7*(24*60*60*1000) -1; };
+	this.thismonth_end = function(){ return timestamp +31*(24*60*60*1000) -1; };
+	this.today = this.today_start;
+	this.tomorrow = this.tomorrow_start;
+}();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -272,16 +262,16 @@ process.app.all('/events*', function(request, response) {
 	}
 
 	// finally requireds
-	query['time'] = {$gt:Date.now()};
-	if (request_query['time']=='today') {
-		query['time'] = {$gt:process.timestamp.today_start(),$lt:process.timestamp.today_end()};
+	query['timestamp'] = {$gt:Date.now()};
+	if (request_query['timestamp']=='today') {
+		query['timestamp'] = {$gt:process.timestamp.today_start(),$lt:process.timestamp.today_end()};
 	}
 
 	// ok go
 	process.console.log('get /events  '+JSON.stringify(query));
 	model.mongoose.item
 	.find(query)
-	.sort({time:-1})
+	.sort({timestamp:-1,random:-1})
 	.exec(function(err, items){
 		if (err) {
 			return process.console.warn(err);
@@ -305,7 +295,7 @@ process.app.post('/items', function(request, response) {
 	for (var it = 0; it < request.body.items.length; it++) {
 		var item = request.body.items[it];
 		var query = {};
-		query._id = process.fun.str_uid(item.time+item.text);
+		query._id = item.timestamp+process.fun.str_id(item.text);
 		process.console.info(JSON.stringify(query,null,'\t'));
 		delete item.site;
 		model.mongoose.item.update(query, item, {upsert:true}, function (err, data) {

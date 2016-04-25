@@ -1,4 +1,4 @@
-exports.str_uid = function(str) {
+exports.hash_int = function(str) {
 	// simple
 	str = str.replace(/[^A-Za-z0-9]/g, '');
 	// unique
@@ -12,10 +12,14 @@ exports.str_uid = function(str) {
 		hash = hash & hash; // Convert to 32bit integer
 	}
 	// ok
-	return str.substr(0,40) + hash;
+	return hash;
 };
 
-exports.random_uid = function(length) {
+exports.hash_str = function(str) {
+	return str.substr(0,40) + exports.int_id(str);
+};
+
+exports.hash_random = function(length) {
 	length = parseInt(length);
 	if (!length) {
 		length = 11;
