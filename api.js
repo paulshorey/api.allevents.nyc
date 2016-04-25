@@ -237,7 +237,7 @@ process.app.get('/time*', function(request, response) {
 // get events
 process.app.all('/events*', function(request, response) {
 	console.warn('/events '+request.METHOD);
-	res.header('Access-Control-Allow-Origin', request.hostname);
+	res.header('Access-Control-Allow-Origin', '*');
 	res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
 	res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With');
 	// intercept OPTIONS method
