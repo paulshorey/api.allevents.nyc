@@ -237,10 +237,10 @@ process.app.get('/time*', function(request, response) {
 // get events
 process.app.all('/events*', function(request, response) {
 	process.console.warn('/events '+request.method+' from '+request.hostname);
+	response.setHeader('Access-Control-Allow-Origin', '*');
+	response.setHeader('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
+	response.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With');
 	if ('OPTIONS' == request.method) {
-		response.setHeader('Access-Control-Allow-Origin', '*');
-		response.setHeader('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
-		response.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With');
 		response.writeHead(200);
 		response.end();
 		return;
