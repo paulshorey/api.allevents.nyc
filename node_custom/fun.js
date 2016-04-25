@@ -1,7 +1,5 @@
 exports.hash_int = function(str) {
-	// simple
 	str = str.replace(/[^A-Za-z0-9]/g, '');
-	// unique
 	var hash = 0;
 	if (str.length == 0) {
 		return hash;
@@ -11,12 +9,23 @@ exports.hash_int = function(str) {
 		hash = ((hash << 5) - hash) + char;
 		hash = hash & hash; // Convert to 32bit integer
 	}
-	// ok
 	return hash;
 };
 
 exports.hash_str = function(str) {
-	return str.substr(0,40) + exports.int_id(str);
+	// number
+	str = str.replace(/[^A-Za-z0-9]/g, '');
+	var hash = 0;
+	if (str.length == 0) {
+		return hash;
+	}
+	for (i = 0; i < str.length; i++) {
+		char = str.charCodeAt(i);
+		hash = ((hash << 5) - hash) + char;
+		hash = hash & hash; // Convert to 32bit integer
+	}
+	// string
+	return str.substr(0,40) + hash;
 };
 
 exports.hash_random = function(length) {
