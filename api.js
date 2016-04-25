@@ -16,7 +16,7 @@ process.env.PORT = 1080;
 process.env.PATH = __dirname;
 // app
 process.app = process.inc.express();
-process.app.use(process.cors({credentials: true, origin: true}));
+process.app.use(process.cors());
 process.app.use(process.inc.express_parser.json({
 	limit: '50mb'
 }));
