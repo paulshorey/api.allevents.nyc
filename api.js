@@ -241,11 +241,9 @@ process.app.all('/events*', function(request, response) {
 		response.setHeader('Access-Control-Allow-Origin', 'allevents.nyc');
 		response.setHeader('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
 		response.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With');
-			process.console.trace('/events '+request.method+' after setHeader');
 		response.writeHead(200);
-			process.console.trace('/events '+request.method+' after writeHead');
 		response.end();
-			process.console.trace('/events '+request.method+' after end');
+		return;
 	}
 
 	var request_query = Object.keys(request.body).length ? request.body : request.query;
