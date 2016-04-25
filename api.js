@@ -9,6 +9,7 @@ process.request = require('request');
 process.fs = require('fs');
 process.q = require('q');
 process.contentful = require('contentful');
+process.url = require('url');
 // process.cors = require('cors');
 //process.mkdirp = require('mkdirp');
 // env
@@ -236,7 +237,8 @@ process.app.get('/time*', function(request, response) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // get events
 process.app.all('/events*', function(request, response) {
-	process.console.warn('/events '+request.method+' from '+JSON.stringify(request.headers));
+	var fromHost = url.parse(request.headers.referrer, true, true).hostname;
+	process.console.warn('/events '+request.method+' from '+fromHost);
 
 	response.setHeader('Access-Control-Allow-Origin', '*');
 	response.setHeader('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
