@@ -236,12 +236,11 @@ process.app.get('/time*', function(request, response) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // get events
 process.app.all('/events*', function(request, response) {
-	console.warn('/events '+request.METHOD);
-	response.header('Access-Control-Allow-Origin', 'allevents.nyc');
-	response.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
-	response.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With');
-	// intercept OPTIONS method
+	console.warn('/events '+request.method);
 	if ('OPTIONS' == request.method) {
+		response.header('Access-Control-Allow-Origin', 'allevents.nyc');
+		response.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
+		response.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With');
 		response.sendStatus(200);
 		response.end();
 	}
