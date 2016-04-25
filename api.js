@@ -237,13 +237,13 @@ process.app.get('/time*', function(request, response) {
 // get events
 process.app.all('/events*', function(request, response) {
 	console.warn('/events '+request.METHOD);
-	res.header('Access-Control-Allow-Origin', 'allevents.nyc');
-	res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
-	res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With');
+	response.header('Access-Control-Allow-Origin', 'allevents.nyc');
+	response.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
+	response.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With');
 	// intercept OPTIONS method
-	if ('OPTIONS' == req.method) {
-		res.sendStatus(200);
-		res.end();
+	if ('OPTIONS' == request.method) {
+		response.sendStatus(200);
+		response.end();
 	}
 
 	var request_query = Object.keys(request.body).length ? request.body : request.query;
