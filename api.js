@@ -40,7 +40,7 @@ process.app.configure(function() {
 			next();
 		}
 	});
-}
+});
 // custom
 process.fun = require("./node_custom/fun.js");
 process.console = require("./node_custom/console.js").console; // uses process.app
