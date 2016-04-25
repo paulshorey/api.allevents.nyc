@@ -9,14 +9,19 @@ process.request = require('request');
 process.fs = require('fs');
 process.q = require('q');
 process.contentful = require('contentful');
-process.cors = require('cors');
+// process.cors = require('cors');
 //process.mkdirp = require('mkdirp');
 // env
 process.env.PORT = 1080;
 process.env.PATH = __dirname;
 // app
 process.app = process.inc.express();
-process.app.use(process.cors());
+// process.app.use(process.cors());
+process.app.use(function(req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  next();
+});
 process.app.use(process.inc.express_parser.json({
 	limit: '50mb'
 }));
@@ -235,6 +240,7 @@ process.app.get('/time*', function(request, response) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // get events
 process.app.all('/events*', function(request, response) {
+	console.warn('/events');
 
 	var request_query = Object.keys(request.body).length ? request.body : request.query;
 	var query = {};
