@@ -17,7 +17,6 @@ process.env.PORT = 1080;
 process.env.PATH = __dirname;
 // app
 process.app = process.inc.express();
-process.app.configure(function() {
 	process.app.use(process.inc.express_parser.json({
 		limit: '50mb'
 	}));
@@ -40,7 +39,6 @@ process.app.configure(function() {
 			next();
 		}
 	});
-});
 // custom
 process.fun = require("./node_custom/fun.js");
 process.console = require("./node_custom/console.js").console; // uses process.app
