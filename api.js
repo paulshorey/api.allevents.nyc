@@ -236,7 +236,7 @@ process.app.get('/time*', function(request, response) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // get events
 process.app.all('/events*', function(request, response) {
-	process.console.warn('/events '+request.method+' from '+request['X-Host']);
+	process.console.warn('/events '+request.method+' from '+request.headers['X-Host']);
 
 	response.setHeader('Access-Control-Allow-Origin', '*');
 	response.setHeader('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
