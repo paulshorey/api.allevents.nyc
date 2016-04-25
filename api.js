@@ -17,16 +17,30 @@ process.env.PORT = 1080;
 process.env.PATH = __dirname;
 // app
 process.app = process.inc.express();
-// process.app.use(process.cors());
-process.app.use(process.inc.express_parser.json({
-	limit: '50mb'
-}));
-process.app.use(process.inc.express_parser.urlencoded({
-	limit: '50mb',
-	extended: true
-}));
-process.app.use(process.inc.express.static('public'));
-process.app.disable('trust proxy');
+process.app.configure(function() {
+	process.app.use(process.inc.express_parser.json({
+		limit: '50mb'
+	}));
+	process.app.use(process.inc.express_parser.urlencoded({
+		limit: '50mb',
+		extended: true
+	}));
+	process.app.use(process.inc.express.static('public'));
+	process.app.disable('trust proxy');
+	process.app.use(function(request, response, next){
+		var referrer = process.url.parse(request.headers.referer, true, true).hostname;
+		response.setHeader('Access-Control-Allow-Origin', referrer);
+		response.setHeader('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
+		response.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With, X-Host');
+		if ('OPTIONS' == request.method) {
+			response.writeHead(200);
+			response.end();
+			return;
+		} else {
+			next();
+		}
+	});
+}
 // custom
 process.fun = require("./node_custom/fun.js");
 process.console = require("./node_custom/console.js").console; // uses process.app
@@ -237,17 +251,9 @@ process.app.get('/time*', function(request, response) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // get events
 process.app.all('/events*', function(request, response) {
-	var fromHost = process.url.parse(request.headers.referer, true, true).hostname;
-	process.console.warn('/events '+request.method+' from '+fromHost);
-
-	response.setHeader('Access-Control-Allow-Origin', '*');
-	response.setHeader('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
-	response.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With, X-Host');
-	if ('OPTIONS' == request.method) {
-		response.writeHead(200);
-		response.end();
-		return;
-	}
+	var meta = {};
+	meta.referrer = process.url.parse(request.headers.referer, true, true).hostname;
+	process.console.warn('/events '+request.method+' from '+meta.referrer);
 
 	var request_query = Object.keys(request.body).length ? request.body : request.query;
 	var query = {};
@@ -291,7 +297,7 @@ process.app.all('/events*', function(request, response) {
 		} else {
 			response.setHeader('Content-Type', 'application/json'); 
 			response.writeHead(200);
-			response.write(JSON.stringify({data:items, error:0},null,"\t"));
+			response.write(JSON.stringify({meta:meta, data:items, error:0},null,"\t"));
 			response.end();
 		}
 	});
