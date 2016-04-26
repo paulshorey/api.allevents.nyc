@@ -256,7 +256,7 @@ process.app.get('/time*', function(request, response) {
 // get events
 process.app.all('/events*', function(request, response) {
 	var meta = {};
-	meta.referrer = process.url.parse(request.headers.referer, true, true).hostname;
+	meta.referrer = process.url.parse(request.headers.referer||'', true, true).hostname;
 	process.console.warn('/events '+request.method+' from '+meta.referrer);
 
 	var request_query = Object.keys(request.body).length ? request.body : request.query;
