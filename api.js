@@ -30,6 +30,7 @@ process.app = process.inc.express();
 		process.console.log('referer '+request.headers.referer);
 		if (!request.headers.referer) {
 			next();
+			return
 		}
 		var referrer = process.url.parse(request.headers.referer, true, true).hostname;
 		response.setHeader('Access-Control-Allow-Origin', '*'); // header contains the invalid value 'app.allevents.nyc'. Origin 'http://app.allevents.nyc' is therefore not allowed access <-- don't know if browser will include http:// or not
@@ -41,6 +42,7 @@ process.app = process.inc.express();
 			return;
 		} else {
 			next();
+			return;
 		}
 	});
 // custom
