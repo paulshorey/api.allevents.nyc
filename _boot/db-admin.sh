@@ -1,5 +1,5 @@
-# sleep 3
+sleep 3
 
-# cd /www/api-nyc/admin
+cd /www/api-nyc/admin
 
-# node app.js
+node app.js

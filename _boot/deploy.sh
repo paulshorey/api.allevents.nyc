@@ -1,6 +1,6 @@
-# sleep 20
+sleep 20
 
-# cd /www/api-nyc
+cd /www/api-nyc
 
-# echo node deploy.js starting...
-# node _hook/deploy.js
+echo node deploy.js starting...
+node _hook/deploy.js
