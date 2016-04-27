@@ -7,6 +7,8 @@ process.moment = require('moment-timezone'); // process.moment(new Date(2011, 9,
 process.moment.now = process.moment();
 process.request = require('request');
 process.fs = require('fs');
+process.http = require('http');
+process.https = require('https');
 process.q = require('q');
 process.contentful = require('contentful');
 process.url = require('url');
@@ -441,6 +443,7 @@ process.app.post('/items', function(request, response) {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // start
-process.app.listen(process.env.PORT, function() {
-	process.console.log("Node app is running at localhost: " + process.env.PORT);
-});
+var httpServer = http.createServer(process.app);
+var httpsServer = https.createServer({key: process.fs.readFileSync('/etc/letsencrypt/live/api.allevents.nyc/privkey.pem', 'utf8'), cert: process.fs.readFileSync('/etc/letsencrypt/live/api.allevents.nyc/cert.pem', 'utf8')}, process.app);
+httpServer.listen(process.env.PORT);
+httpsServer.listen(443);
