@@ -27,12 +27,7 @@ process.app = process.inc.express();
 	process.app.use(process.inc.express.static('public'));
 	process.app.disable('trust proxy');
 	process.app.use(function(request, response, next){
-		process.console.log('referer '+request.headers.referer);
-		if (!request.headers.referer) {
-			next();
-			return
-		}
-		var referrer = process.url.parse(request.headers.referer, true, true).hostname;
+		var referrer = process.url.parse(request.headers.referer||'', true, true).hostname;
 		response.setHeader('Access-Control-Allow-Origin', '*'); // header contains the invalid value 'app.allevents.nyc'. Origin 'http://app.allevents.nyc' is therefore not allowed access <-- don't know if browser will include http:// or not
 		response.setHeader('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
 		response.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With, X-Host');
