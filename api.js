@@ -32,7 +32,7 @@ process.app = process.inc.express();
 		var referrer = process.url.parse(request.headers.referer||'', true, true).hostname;
 		response.setHeader('Access-Control-Allow-Origin', '*'); // header contains the invalid value 'app.allevents.nyc'. Origin 'http://app.allevents.nyc' is therefore not allowed access <-- don't know if browser will include http:// or not
 		response.setHeader('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
-		response.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With, X-Host');
+		response.setHeader('Access-Control-Allow-Headers', 'Content-Type, Cache-Control, Pragma, Authorization, Content-Length, X-Requested-With, X-Host');
 		if ('OPTIONS' == request.method) {
 			response.writeHead(200);
 			response.end();
