@@ -269,7 +269,7 @@ process.app.all('/events*', function(request, response) {
 		if (qk=='category' || qk=='scene'){
 
 			// each column
-			var $in = []
+			query[qk] = {$in:[]};
 
 			// each search term
 			var split = request_query[qk].split(',').map(function(e){return e.trim();});
