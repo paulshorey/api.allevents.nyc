@@ -268,16 +268,15 @@ process.app.all('/events*', function(request, response) {
 	for (var qk in request_query) {
 		if (qk=='category' || qk=='scene'){
 
-			// each column
-			query[qk] = {$in:[]};
+			// multiple terms
+			// query[qk] = {$in:[]};
+			// var split = request_query[qk].split(',').map(function(e){return e.trim();});
+			// for (var sk in split) {
+			// 	query[qk].$in.push( new RegExp(split[sk],'i') );
+			// }
 
-			// each search term
-			var split = request_query[qk].split(',').map(function(e){return e.trim();});
-			for (var sk in split) {
-				var re = new RegExp(split[sk],'i');
-				query[qk].$in.push( re );
-			}
-			query[qk].$in = /films/i;
+			// for now just do one
+			query[qk] = new RegExp(request_query[sk],'i');
 
 		}
 	}
@@ -445,6 +444,7 @@ process.app.post('/items', function(request, response) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // start
 var httpServer = process.http.createServer(process.app);
-var httpsServer = process.https.createServer({key: process.fs.readFileSync('/etc/letsencrypt/live/api.allevents.nyc/privkey.pem', 'utf8'), cert: process.fs.readFileSync('/etc/letsencrypt/live/api.allevents.nyc/cert.pem', 'utf8')}, process.app);
 httpServer.listen(process.env.PORT);
+
+var httpsServer = process.https.createServer({key: process.fs.readFileSync('/etc/letsencrypt/live/api.allevents.nyc/privkey.pem', 'utf8'), cert: process.fs.readFileSync('/etc/letsencrypt/live/api.allevents.nyc/cert.pem', 'utf8')}, process.app);
 httpsServer.listen(443);
