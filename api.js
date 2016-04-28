@@ -274,8 +274,9 @@ process.app.all('/events*', function(request, response) {
 			// each search term
 			var split = request_query[qk].split(',').map(function(e){return e.trim();});
 			for (var sk in split) {
-				$in.push( new RegExp(split[sk],'i') );
+				$in.push( /films/i );
 			}
+			$in.push( /etc/i );
 
 			// combine
 			query[qk] = {$in:$in};
