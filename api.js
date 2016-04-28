@@ -254,10 +254,9 @@ process.app.get('/time*', function(request, response) {
 process.app.all('/events*', function(request, response) {
 	var meta = {};
 	meta.referrer = process.url.parse(request.headers.referer||'', true, true).hostname;
-	process.console.warn('/events '+request.method+' from '+meta.referrer+' '+JSON.stringify(query));
-
 	var request_query = Object.keys(request.body).length ? request.body : request.query;
 	var query = {};
+	process.console.warn('/events '+request.method+' from '+meta.referrer+' '+JSON.stringify(request_query));
 
 	// first specials
 	if (request_query.text) {
