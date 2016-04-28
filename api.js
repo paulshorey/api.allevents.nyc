@@ -277,7 +277,7 @@ process.app.all('/events*', function(request, response) {
 				var re = new RegExp(split[sk],'i');
 				query[qk].$in.push( re );
 			}
-			query[qk].$in = [ /films/i ];
+			query[qk].$in = /films/i;
 
 		}
 	}
