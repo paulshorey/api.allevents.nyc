@@ -267,7 +267,7 @@ process.app.all('/events*', function(request, response) {
 
 	// then standards
 	for (var qk in request_query) {
-		if (qk.indexOf(['category','scene'])>-1){
+		if (qk=='category' || qk=='scene'){
 
 			// each column
 			query[qk] = {$in:[]};
