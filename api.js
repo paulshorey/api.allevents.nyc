@@ -446,5 +446,5 @@ process.app.post('/items', function(request, response) {
 var httpServer = process.http.createServer(process.app);
 httpServer.listen(process.env.PORT);
 
-var httpsServer = process.https.createServer({key: process.fs.readFileSync('/etc/letsencrypt/live/api.allevents.nyc/privkey.pem', 'utf8'), cert: process.fs.readFileSync('/etc/letsencrypt/live/api.allevents.nyc/cert.pem', 'utf8')}, process.app);
+var httpsServer = process.https.createServer({key: process.fs.readFileSync('/etc/letsencrypt/live/api.allevents.nyc/privkey.pem', 'utf8'), cert: process.fs.readFileSync('/etc/letsencrypt/live/api.allevents.nyc/fullchain.pem', 'utf8')}, process.app);
 httpsServer.listen(443);
