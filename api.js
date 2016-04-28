@@ -276,7 +276,7 @@ process.app.all('/events*', function(request, response) {
 			// }
 
 			// for now just do one
-			query[qk] = new RegExp(request_query[sk],'i');
+			query[qk] = new RegExp(request_query[qk],'i');
 
 		}
 	}
