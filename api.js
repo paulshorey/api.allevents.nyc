@@ -269,20 +269,23 @@ process.app.all('/events*', function(request, response) {
 		if (qk=='category' || qk=='scene'){
 
 			// each column
-			query[qk] = {$in:[]};
+			var $in = []
 
 			// each search term
 			var split = request_query[qk].split(',').map(function(e){return e.trim();});
 			for (var sk in split) {
-				query[qk].$in.push( new RegExp(split[sk],'i') );
+				$in.push( new RegExp(split[sk],'i') );
 			}
+
+			// combine
+			query[qk] = {$in:$in};
 
 		}
 	}
 
 	// finally requireds
 	query['timestamp'] = {$gt:Date.now()};
-	if (request_query['timestamp']=='today') {
+	if (request_query['time']=='today') {
 		query['timestamp'] = {$gt:process.timestamp.today_start(),$lt:process.timestamp.today_end()};
 	}
 
