@@ -82,26 +82,25 @@ model.contentful.myEntries = function(entries){
 };
 model.contentful.getContent = function(item,items){ 
 	// gets {{item}}, saves to global variable view[{{items}}]
-	view[items] = {};
-	process.contentful.myClient.entries({ content_type: item })
+	view[items] = [];
+	process.contentful.myClient.entries({ content_type: item, order: '-fields.likes' })
 	.then(function(items_new) {
 		items_new = model.contentful.myEntries(items_new, undefined, item); // from contentful
 		if (items_new) {
-			for (var si in items_new) {
-				// memory
-				view[items][si] = items_new[si];
+			for (var key in items_new) {
+				// save
+				view[items].push(items_new[key]);
+				var i = view[items].length-1;
 				// tweak
 				if (item=='site') {
-					view[items][si].host = view[items][si].url.match(/(^https?:\/\/[a-z.-]*[a-z]*)/)[1];
-					view[items][si].link = view[items][si].url.replace(/{{([^}]*)}}/g, function(match, string) {
+					view[items][i].host = view[items][i].url.match(/(^https?:\/\/[a-z.-]*[a-z]*)/)[1];
+					view[items][i].link = view[items][i].url.replace(/{{([^}]*)}}/g, function(match, string) {
 						var now = Date.now();
 						var plus = string.split('+');
 						string = plus[0];
 						if (plus[1]) {
 							now += parseInt(plus[1]);
 						}
-						process.console.warn(string);
-						process.console.warn(JSON.stringify(plus));
 						return process.moment(now).format(string);
 					});
 				}
@@ -109,9 +108,6 @@ model.contentful.getContent = function(item,items){
 		}
 		// done
 		process.console.info(''+(items_new.length||0)+' '+items);
-		if (item=='site') {
-			process.console.info(JSON.stringify(items_new));
-		}
 	});
 };
 // mongoose
@@ -183,7 +179,7 @@ process.app.all('/hook/contentful', function(request, response) {
 	response.end();
 });
 process.app.all('/_hook/contentful', function(request, response) {
-	process.console.warn('/hook/contentful');
+	process.console.warn('/_hook/contentful');
 	model.contentful.getContent('site','sites');
 	model.contentful.getContent('category','categories');
 	model.contentful.getContent('scene','scenes');
@@ -209,13 +205,16 @@ process.app.all('/_hook/contentful', function(request, response) {
 process.app.get('/all', function(request, response) {
 	process.console.log('get /sites');
 	var all = {};
-		all.sites = view.sites || {};
-		all.categories = view.categories || {};
-		all.scenes = view.scenes || {};
-	response.setHeader('Content-Type', 'application/json');
-	response.writeHead(200);
-	response.write(JSON.stringify({data:all, error:0},null,"\t"));
-	response.end();
+		all.sites = view.sites || [];
+		all.categories = view.categories || [];
+		all.scenes = view.scenes || [];
+		model.mongoose.item.find({}).count().exec().then(function (count) {
+			all.eventsCount = count;
+			response.setHeader('Content-Type', 'application/json');
+			response.writeHead(200);
+			response.write(JSON.stringify({data:all, error:0},null,"\t"));
+			response.end();
+		});
 });
 process.app.get('/sites', function(request, response) {
 	process.console.log('get /sites');
@@ -276,7 +275,7 @@ process.app.all('/events*', function(request, response) {
 			// }
 
 			// for now just do one
-			query[qk] = new RegExp(request_query[qk],'i');
+			query[qk] = new RegExp(request_query[qk].replace('+','\\+'),'i');
 
 		}
 	}
@@ -284,7 +283,7 @@ process.app.all('/events*', function(request, response) {
 	// finally requireds
 	query['timestamp'] = {$gt:Date.now()};
 	if (request_query['time']=='today') {
-		query['timestamp'] = {$gt:process.timestamp.today_start(),$lt:process.timestamp.today_end()};
+		query['timestamp'] = {$gt:process.timestamp.today_start()-1,$lt:process.timestamp.today_end()};
 	}
 
 	// ok go
@@ -314,6 +313,9 @@ process.app.post('/items', function(request, response) {
 	
 	for (var it = 0; it < request.body.items.length; it++) {
 		var item = request.body.items[it];
+		if (item.timestamp < Date.now()) {
+			continue;
+		}
 		var query = {};
 		query._id = item.timestamp+process.fun.hash_str(item.text);
 		process.console.info(JSON.stringify(query,null,'\t'));
