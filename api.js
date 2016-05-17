@@ -257,17 +257,17 @@ process.app.all('/events*', function(request, response) {
 	var query = {};
 	process.console.warn('/events '+request.method+' from '+meta.referrer+' '+JSON.stringify(request_query));
 
-	// first specials
+	// first special keys
 	if (request_query.text) {
 		delete request_query.text;
 		query.$text = {$search:request_query.text};
 	}
 
-	// then standards
+	// then automatic keys
 	for (var qk in request_query) {
 		if (qk=='category' || qk=='scene'){
 
-			// multiple terms
+			// multiple terms // dont work, can't store finished RegExp object as a variable, it gets output as empty object
 			// query[qk] = {$in:[]};
 			// var split = request_query[qk].split(',').map(function(e){return e.trim();});
 			// for (var sk in split) {
@@ -280,7 +280,7 @@ process.app.all('/events*', function(request, response) {
 		}
 	}
 
-	// finally requireds
+	// required & default keys
 	query['timestamp'] = {$gt:Date.now()};
 	if (request_query['time']=='today') {
 		query['timestamp'] = {$gt:process.timestamp.today_start()-1,$lt:process.timestamp.today_end()};
@@ -290,7 +290,7 @@ process.app.all('/events*', function(request, response) {
 	process.console.log('get /events  '+JSON.stringify(query));
 	model.mongoose.item
 	.find(query)
-	.sort({timestamp:-1,random:-1})
+	.sort({timestamp:1,random:1}) // randomize, so it doesn't segregate events which HAVE and have NOT the exact time
 	.exec(function(err, items){
 		if (err) {
 			return process.console.warn(err);
