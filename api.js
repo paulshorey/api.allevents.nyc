@@ -115,7 +115,7 @@ model.mongoose = {};
 model.mongoose.schemas = {};
 model.mongoose.schemas.item = { 
 	_id: String,
-	text: { type:String, required: true },
+	texts: { type:Object, required: true },
 	timestamp: { type:Number, required: true },
 	image: String,
 	link: String,
@@ -290,7 +290,7 @@ process.app.all('/events*', function(request, response) {
 	process.console.log('get /events  '+JSON.stringify(query));
 	model.mongoose.item
 	.find(query)
-	.sort({timestamp:1,random:1}) // randomize, so it doesn't segregate events which HAVE and have NOT the exact time
+	.sort({timestamp:1})
 	.exec(function(err, items){
 		if (err) {
 			return process.console.warn(err);
@@ -317,8 +317,7 @@ process.app.post('/items', function(request, response) {
 			continue;
 		}
 		var query = {};
-		query._id = item.timestamp+process.fun.hash_str(item.text);
-		process.console.info(JSON.stringify(query,null,'\t'));
+		query._id = item.timestamp+process.fun.hash_str(item.texts.join());
 		delete item.site;
 		model.mongoose.item.update(query, item, {upsert:true}, function (err, data) {
 			if (err) {
