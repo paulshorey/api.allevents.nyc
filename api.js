@@ -124,6 +124,8 @@ model.mongoose.schemas.item = {
 	venue: String,
 	date: String,
 	time: String,
+	featured: { type:String, default: '' },
+	price: { type:String, default: '' },
 	timeAdded: { type:Number, default: Date.now() },
 	likes: { type:Number, default: 0 },
 	random: { type:Number, default: 0 },
