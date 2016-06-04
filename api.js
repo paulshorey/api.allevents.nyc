@@ -93,7 +93,7 @@ model.contentful.getContent = function(item,items){
 				var i = view[items].length-1;
 				// tweak
 				if (item=='site') {
-					view[items][i].host = view[items][i].url.match(/(^https?:\/\/[a-z.-]*[a-z]*)/)[1];
+					view[items][i].host = view[items][i].url.match(/(^https?:\/\/[a-zA-Z0-9.-]*)/)[1];
 					view[items][i].link = view[items][i].url.replace(/{{([^}]*)}}/g, function(match, string) {
 						var now = Date.now();
 						var plus = string.split('+');
