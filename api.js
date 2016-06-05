@@ -251,10 +251,25 @@ process.app.get('/time*', function(request, response) {
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-// delete events
-process.app.all('/delete', function(request, response) {
-	// ok go
-	process.console.warn('/delete');
+// count events
+process.app.all('/count', function(request, response) {
+	process.console.info('/count');
+	model.mongoose.item
+	.count({})
+	.exec(function(err, items){
+		if (err) {
+			return process.console.warn(err);
+		} else {
+			response.setHeader('Content-Type', 'application/json'); 
+			response.writeHead(200);
+			response.write(JSON.stringify({count:items, error:0},null,"\t"));
+			response.end();
+		}
+	});
+});
+// remove events
+process.app.all('/remove', function(request, response) {
+	process.console.warn('/remove');
 	model.mongoose.item
 	.remove({})
 	.exec(function(err, items){
