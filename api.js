@@ -251,6 +251,23 @@ process.app.get('/time*', function(request, response) {
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+// delete events
+process.app.all('/delete', function(request, response) {
+	// ok go
+	process.console.warn('/delete');
+	model.mongoose.item
+	.remove({})
+	.exec(function(err, items){
+		if (err) {
+			return process.console.warn(err);
+		} else {
+			response.setHeader('Content-Type', 'application/json'); 
+			response.writeHead(200);
+			response.write(JSON.stringify({deleted:items, error:0},null,"\t"));
+			response.end();
+		}
+	});
+});
 // get events
 process.app.all('/events*', function(request, response) {
 	var meta = {};
