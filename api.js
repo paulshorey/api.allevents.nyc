@@ -20,10 +20,13 @@ process.env.PATH = __dirname;
 // app
 process.app = process.inc.express();
 	process.app.use(process.inc.express_parser.json({
-		limit: '50mb'
+		limit: '50mb',
+		parameterLimit: 10000,
+		extended: true
 	}));
 	process.app.use(process.inc.express_parser.urlencoded({
 		limit: '50mb',
+		parameterLimit: 10000,
 		extended: true
 	}));
 	process.app.use(process.inc.express.static('public'));
@@ -309,7 +312,7 @@ process.app.all('/events*', function(request, response) {
 			// }
 
 			// for now just do one
-			query[qk] = new RegExp(request_query[qk].replace('+','\\+'),'i');
+			query[qk] = new RegExp(request_query[qk].replace('+','\\+')+'$','i');
 
 		}
 	}
@@ -351,6 +354,11 @@ process.app.post('/items', function(request, response) {
 			continue;
 		}
 		var query = {};
+		if (!item.texts && !item.texts[0]) {
+			continue;
+		} else {
+			process.console.info(item.texts[0]);
+		}
 		query._id = item.timestamp+process.fun.hash_str(item.texts.join());
 		delete item.site;
 		model.mongoose.item.update(query, item, {upsert:true}, function (err, data) {
@@ -358,7 +366,6 @@ process.app.post('/items', function(request, response) {
 				process.console.error(err);
 				return false;
 			}
-			process.console.info(data);
 		});
 	}
 
