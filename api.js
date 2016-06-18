@@ -303,6 +303,7 @@ process.app.all('/events*', function(request, response) {
 	// then automatic keys
 	for (var qk in request_query) {
 		if (qk=='category' || qk=='scene'){
+			request_query[qk] = process.fun.capitalize(request_query[qk]);
 
 			// multiple terms // dont work, can't store finished RegExp object as a variable, it gets output as empty object
 			// query[qk] = {$in:[]};
@@ -312,26 +313,27 @@ process.app.all('/events*', function(request, response) {
 			// }
 
 			// for now just do one
-			query[qk] = new RegExp(request_query[qk].replace('+','\\+')+'$','i');
+			query[qk] = new RegExp(request_query[qk].replace('+','\\+'),'ig');
 
 		}
 	}
 
 	// required & default keys
-	query['timestamp'] = {$gt:Date.now()};
+	query['time_stamp'] = {$gt:Date.now()};
 	if (request_query['time']=='today') {
-		query['timestamp'] = {$gt:process.timestamp.today_start()-1,$lt:process.timestamp.today_end()};
+		query['time_stamp'] = {$gt:process.timestamp.today_start()-1,$lt:process.timestamp.today_end()};
 	}
 
 	// ok go
 	process.console.log('get /events  '+JSON.stringify(query));
 	model.mongoose.item
 	.find(query)
-	.sort({timestamp:1})
+	.sort({time_stamp:1})
 	.exec(function(err, items){
 		if (err) {
 			return process.console.warn(err);
 		} else {
+			meta.count = items.length;
 			response.setHeader('Content-Type', 'application/json'); 
 			response.writeHead(200);
 			response.write(JSON.stringify({meta:meta, data:items, error:0},null,"\t"));
