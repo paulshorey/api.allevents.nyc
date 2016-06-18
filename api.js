@@ -319,16 +319,16 @@ process.app.all('/events*', function(request, response) {
 	}
 
 	// required & default keys
-	query['time_stamp'] = {$gt:Date.now()};
+	query['timestamp'] = {$gt:Date.now()};
 	if (request_query['time']=='today') {
-		query['time_stamp'] = {$gt:process.timestamp.today_start()-1,$lt:process.timestamp.today_end()};
+		query['timestamp'] = {$gt:process.timestamp.today_start()-1,$lt:process.timestamp.today_end()};
 	}
 
 	// ok go
 	process.console.log('get /events  '+JSON.stringify(query));
 	model.mongoose.item
 	.find(query)
-	.sort({time_stamp:1})
+	.sort({timestamp:1})
 	.exec(function(err, items){
 		if (err) {
 			return process.console.warn(err);
