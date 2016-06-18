@@ -313,7 +313,7 @@ process.app.all('/events*', function(request, response) {
 			// }
 
 			// for now just do one
-			query[qk] = new RegExp(request_query[qk].replace('+','\\+'),'ig');
+			query[qk] = new RegExp(request_query[qk].replace('+','\\+'),'');
 
 		}
 	}
