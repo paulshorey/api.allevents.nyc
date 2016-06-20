@@ -173,18 +173,8 @@ model.contentful.getContent('scene','scenes');
 //////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // HOOK
-process.app.all('/hook/contentful', function(request, response) {
-	process.console.warn('/hook/contentful');
-	model.contentful.getContent('site','sites');
-	model.contentful.getContent('category','categories');
-	model.contentful.getContent('scene','scenes');
-	response.setHeader('Content-Type', 'application/json');
-	response.writeHead(200);
-	response.write('');
-	response.end();
-});
-process.app.all('/_hook/contentful', function(request, response) {
-	process.console.warn('/_hook/contentful');
+process.app.all('/_contentful', function(request, response) {
+	process.console.warn('hook /_contentful');
 	model.contentful.getContent('site','sites');
 	model.contentful.getContent('category','categories');
 	model.contentful.getContent('scene','scenes');
