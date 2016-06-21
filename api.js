@@ -382,7 +382,7 @@ process.app.post('/items', function(request, response) {
 			continue;
 		}
 		var query = {};
-		if (!item.texts && !item.texts[0]) {
+		if (!item.texts || !item.texts[0]) {
 			continue;
 		} else {
 			process.console.info(item.texts[0]);
