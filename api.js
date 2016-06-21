@@ -1,3 +1,10 @@
+/*
+	GUIDELINES:
+	response .data is always array of objects, even if only one item requested or queried
+	post request consists of one or more objects, named corresponding to the object type they are modifying
+	get request consists of one or more strings, referencing the url or id of the aptly named object type
+*/
+
 var pro = process;
 process.inc = {};
 process.inc.express = require('express');
@@ -218,6 +225,35 @@ process.app.get('/sites', function(request, response) {
 	response.write(JSON.stringify({data:view.sites, error:0},null,"\t"));
 	response.end();
 });
+
+	process.app.get('/site', function(request, response) {
+		process.console.log('get /site');
+		var site = {time_attempted:Date.now()};
+		for (var si in view.sites) {
+			// if never attempted, take first
+			if (!view.sites[si].time_attempted) {
+				site = view.sites[si];
+				break;
+			// if attempted, keep going to find oldest
+			} else if (view.sites[si].time_attempted < site.time_attempted) {
+				site = view.sites[si];
+			}
+		}
+		// if attempted in less than 4 hours
+		if (site.time_attempted > Date.now()-(1000*60*60*0.5)) {
+			response.setHeader('Content-Type', 'application/json');
+			response.writeHead(500);
+			response.write(JSON.stringify({data:null,error:'Recently crawled each site... wait a while to bother them again'},null,"\t"));
+			response.end();
+			return;
+		}
+		// data
+		site.time_attempted = Date.now();
+		response.setHeader('Content-Type', 'application/json');
+		response.writeHead(200);
+		response.write(JSON.stringify({data:[site], error:0},null,"\t"));
+		response.end();
+	});
 process.app.get('/categories', function(request, response) {
 	process.console.log('get /categories');
 	response.setHeader('Content-Type', 'application/json');
@@ -277,7 +313,7 @@ process.app.all('/remove', function(request, response) {
 	});
 });
 // get events
-process.app.all('/events*', function(request, response) {
+process.app.get('/events*', function(request, response) {
 	var meta = {};
 	meta.referrer = process.url.parse(request.headers.referer||'', true, true).hostname;
 	var request_query = Object.keys(request.body).length ? request.body : request.query;
