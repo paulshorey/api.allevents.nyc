@@ -240,7 +240,7 @@ process.app.get('/sites', function(request, response) {
 			}
 		}
 		// if attempted in less than 4 hours
-		if (site.time_attempted > Date.now()-(1000*60*60*0.5)) {
+		if (site.time_attempted > Date.now()-(1000*60*60*4)) {
 			response.setHeader('Content-Type', 'application/json');
 			response.writeHead(500);
 			response.write(JSON.stringify({data:null,error:'Recently crawled each site... wait a while to bother them again'},null,"\t"));
