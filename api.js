@@ -313,7 +313,7 @@ process.app.all('/remove', function(request, response) {
 	});
 });
 // get events
-process.app.get('/events*', function(request, response) {
+process.app.all('/events*', function(request, response) {
 	var meta = {};
 	meta.referrer = process.url.parse(request.headers.referer||'', true, true).hostname;
 	var request_query = Object.keys(request.body).length ? request.body : request.query;
