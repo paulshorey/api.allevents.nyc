@@ -345,7 +345,7 @@ process.app.all('/events*', function(request, response) {
 	}
 
 	// required & default keys
-	query['timestamp'] = {$gt:Date.now()};
+	query['timestamp'] = {$gt: (process.timestamp.today_start() - 1) };
 	if (request_query['time']=='today') {
 		query['timestamp'] = {$gt:process.timestamp.today_start()-1,$lt:process.timestamp.today_end()};
 	}
