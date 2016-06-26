@@ -325,8 +325,8 @@ process.app.all('/events*', function(request, response) {
 
 	// first special keys
 	if (request_query.text) {
-		delete request_query.text;
 		query.$text = {$search:request_query.text};
+		delete request_query.text;
 	}
 
 	// then automatic keys
