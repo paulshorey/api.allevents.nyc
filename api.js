@@ -75,6 +75,7 @@ process.mongoose.connect('mongodb://localhost/api');
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // MODEL
 var model = {};
+
 // contentful
 model.contentful = {};
 model.contentful.myEntries = function(entries){
@@ -120,6 +121,7 @@ model.contentful.getContent = function(item,items){
 		process.console.info(''+(items_new.length||0)+' '+items);
 	});
 };
+
 // mongoose
 model.mongoose = {};
 model.mongoose.schemas = {};
@@ -150,23 +152,24 @@ model.mongoose.item = process.mongoose.model('Item', model.mongoose.schemas.item
 
 // time
 process.timestamp = new function() {
-	var timezone = 'America/New_York';
-	var moment = process.moment(new Date()).tz(timezone);
-	var DD = moment.format('DD');
-	var MM = moment.format('MM');
-	var YYYY = moment.format('YYYY');
-	var timestamp = Date.parse( new Date( YYYY, MM-1, DD ) );
+	var timestamp = function(){ 
+		var timezone = 'America/New_York';
+		var moment = process.moment(new Date()).tz(timezone);
+		var DD = moment.format('DD');
+		var MM = moment.format('MM');
+		var YYYY = moment.format('YYYY');
+		return Date.parse( new Date( YYYY, MM-1, DD ) ); 
+	};
 	this.now = function(){ return Date.now(); };
-	this.today_start = function(){ return timestamp +0; };
-	this.today_end = function(){ return timestamp +1*(24*60*60*1000) -1; };
-	this.tomorrow_start = function(){ return timestamp +1*(24*60*60*1000); };
-	this.tomorrow_end = function(){ return timestamp +2*(24*60*60*1000) -1; };
-	this.thisweek_start = function(){ return timestamp +1*(24*60*60*1000) -1; };
-	this.thisweek_end = function(){ return timestamp +7*(24*60*60*1000) -1; };
-	this.thismonth_end = function(){ return timestamp +31*(24*60*60*1000) -1; };
-	this.today = this.today_start;
-	this.tomorrow = this.tomorrow_start;
+	this.today_start = function(){ return timestamp() +0; };
+	this.today_end = function(){ return timestamp() +1*(24*60*60*1000) -1; };
+	this.tomorrow_start = function(){ return timestamp() +1*(24*60*60*1000); };
+	this.tomorrow_end = function(){ return timestamp() +2*(24*60*60*1000) -1; };
+	this.thisweek_start = function(){ return timestamp() +1*(24*60*60*1000) -1; };
+	this.thisweek_end = function(){ return timestamp() +7*(24*60*60*1000) -1; };
+	this.thismonth_end = function(){ return timestamp() +31*(24*60*60*1000) -1; };
 }();
+console.warn('timestamp.tomorrow_start()',process.timestamp.tomorrow_start());
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -348,6 +351,15 @@ process.app.all('/events*', function(request, response) {
 	query['timestamp'] = {$gt: (process.timestamp.today_start() - 1) };
 	if (request_query['time']=='today') {
 		query['timestamp'] = {$gt:process.timestamp.today_start()-1,$lt:process.timestamp.today_end()};
+	}
+	else if (request_query['time']=='tomorrow') {
+		query['timestamp'] = {$gt:process.timestamp.tomorrow_start()-1,$lt:process.timestamp.tomorrow_end()};
+	}
+	else if (request_query['time']=='this week') {
+		query['timestamp'] = {$gt:process.timestamp.today_start()-1,$lt:process.timestamp.thisweek_end()};
+	}
+	else if (request_query['time']=='this month') {
+		query['timestamp'] = {$gt:process.timestamp.today_start()-1,$lt:process.timestamp.thismonth_end()};
 	}
 
 	// ok go
