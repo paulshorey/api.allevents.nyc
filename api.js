@@ -208,7 +208,7 @@ process.app.all('/_contentful', function(request, response) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // get sites
 process.app.get('/all', function(request, response) {
-	process.console.log('get /sites');
+	process.console.log('get /all');
 	var all = {};
 		all.sites = view.sites || [];
 		all.categories = view.categories || [];
