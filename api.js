@@ -381,6 +381,21 @@ process.app.all('/events*', function(request, response) {
 
 });
 
+process.app.all('/json', function(request, response) {
+	var meta = {};
+	meta.referrer = process.url.parse(request.headers.referer||'', true, true).hostname;
+	var request_query = Object.keys(request.body).length ? request.body : request.query;
+	var query = {};
+	process.console.warn('/json '+request.method+' from '+meta.referrer+' '+JSON.stringify(request_query));
+
+	if (request_query.file) {
+		var json = process.fs.readFileSync('public/json/'+request_query.file+'.json', 'utf8');
+		response.setHeader('Content-Type', 'application/json'); 
+		response.writeHead(200);
+		response.write(JSON.stringify({data:json, error:0},null,"\t"));
+		response.end();
+	}
+});
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////
