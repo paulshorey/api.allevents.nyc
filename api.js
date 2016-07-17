@@ -390,10 +390,17 @@ process.app.all('/json', function(request, response) {
 
 	if (request_query.file) {
 		var json = process.fs.readFileSync('public/json/'+request_query.file+'.json', 'utf8');
+
+		response.setHeader('Access-Control-Allow-Origin', '*'); // header contains the invalid value 'app.allevents.nyc'. Origin 'http://app.allevents.nyc' is therefore not allowed access <-- don't know if browser will include http:// or not
+		response.setHeader('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
+		response.setHeader('Access-Control-Allow-Headers', 'Content-Type, Cache-Control, Pragma, Authorization, Content-Length, X-Requested-With, X-Host');
+		
 		response.setHeader('Content-Type', 'application/json'); 
 		response.writeHead(200);
 		response.write(JSON.stringify({data:json, error:0},null,"\t"));
 		response.end();
+	} else {
+		return process.console.warn('file not found');
 	}
 });
 
