@@ -422,10 +422,10 @@ process.app.all('/json', function(request, response) {
 	process.console.warn('/json '+request.method+' from '+meta.referrer+' '+JSON.stringify(request_query));
 
 	if (request_query.file) {
-		var json = JSON.parse(process.fs.readFileSync('public/json/'+request_query.file+'.json', 'utf8'));
+		var json = process.fs.readFileSync('public/json/'+request_query.file+'.json', 'utf8');
 
 		response.writeHead(200);
-		response.write(JSON.stringify({data:json, error:0},null,"\t"));
+		response.write(json);
 		response.end();
 	} else {
 		return process.console.warn('file not found');
