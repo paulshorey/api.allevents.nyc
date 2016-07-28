@@ -433,7 +433,7 @@ process.app.all('/json', function(request, response) {
 });
 
 // // SSL
-process.app.all('/.well-known/acme-challenge', function(request, response) {
+process.app.all('/.well-known/acme-challenge/*', function(request, response) {
 	response.writeHead(200);
 	response.write('success');
 	response.end();
