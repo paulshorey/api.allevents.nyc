@@ -4,7 +4,7 @@
 
 
 # start app
-#iptables -A PREROUTING -t nat -i eth0 -p tcp --dport 80 -j REDIRECT --to-port 1080
+iptables -A PREROUTING -t nat -i eth0 -p tcp --dport 80 -j REDIRECT --to-port 1080
 iptables -A PREROUTING -t nat -i eth0 -p tcp --dport 443 -j REDIRECT --to-port 1080
 
 eval "$(ssh-agent -s)"
@@ -13,4 +13,10 @@ cd /www/api-nyc
 git reset HEAD -\-hard;
 git pull
 
-node api.js
+i=0;
+while true; do
+	i=$[$i+1]
+	echo node api.js \#$i
+	node api.js
+	sleep 5
+done
