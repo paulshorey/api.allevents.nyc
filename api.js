@@ -22,7 +22,6 @@ process.url = require('url');
 // process.cors = require('cors');
 //process.mkdirp = require('mkdirp');
 // env
-process.env.PORT = 1080;
 process.env.PATH = __dirname;
 // app
 process.app = process.inc.express();
@@ -564,7 +563,7 @@ process.app.all('/json', function(request, response) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // start
 var httpServer = process.http.createServer(process.app);
-httpServer.listen(process.env.PORT);
+httpServer.listen(1080);
 
 var httpsServer = process.https.createServer({key: process.fs.readFileSync('/etc/letsencrypt/live/api.allevents.nyc/privkey.pem', 'utf8'), cert: process.fs.readFileSync('/etc/letsencrypt/live/api.allevents.nyc/fullchain.pem', 'utf8')}, process.app);
-httpsServer.listen(443);
+httpsServer.listen(1443);
