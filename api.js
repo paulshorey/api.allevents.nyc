@@ -322,11 +322,19 @@ process.app.all('/events*', function(request, response) {
 	var request_query = Object.keys(request.body).length ? request.body : request.query;
 	var query = {};
 	process.console.warn('/events '+request.method+' from '+meta.referrer+' '+JSON.stringify(request_query));
+	var query_limit = 1000;
+	var query_skip = 0;
 
 	// first special keys
 	if (request_query.text) {
 		query.$text = {$search:request_query.text};
 		delete request_query.text;
+	} else if (request_query.limit) {
+		query_limit = request_query.limit;
+		delete request_query.limit;
+	} else if (request_query.skip) {
+		query_skip = request_query.skip;
+		delete request_query.skip;
 	}
 
 	// then automatic keys
@@ -366,6 +374,8 @@ process.app.all('/events*', function(request, response) {
 	process.console.log('get /events  '+JSON.stringify(query));
 	model.mongoose.item
 	.find(query)
+	.limit(query_limit)
+	.skip(query_skip)
 	.sort({timestamp:1})
 	.exec(function(err, items){
 		if (err) {
