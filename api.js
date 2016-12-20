@@ -203,6 +203,35 @@ process.app.all('/_contentful', function(request, response) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
+// proxy
+process.app.get('/proxy/json', function(request, response) {
+	process.console.log('get /proxy');
+	
+	var meta = {};
+	meta.referrer = process.url.parse(request.headers.referer||'', true, true).hostname;
+	var request_query = Object.keys(request.body).length ? request.body : request.query;
+	
+	var req = process.http.request({
+		method: 'GET',
+		path: 'http://api.soundcloud.com/users/3207?client_id=f665fc458615b821cdf1a26b6d1657f6'
+	}, function (res) {
+		res.on('data', function (data) {
+			var string = data.toString();
+
+			console.log(JSON.stringify(res.headers));
+			console.log(string);
+
+			response.setHeader('Content-Type', 'application/json');
+			response.writeHead(200);
+			response.write(string);
+			response.end();
+		});
+	});
+	req.end();
+
+});
+
+
 //////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // get sites
@@ -328,10 +357,14 @@ process.app.all('/events*', function(request, response) {
 	if (request_query.text) {
 		query.$text = {$search:request_query.text};
 		delete request_query.text;
-	} else if (request_query.limit) {
+
+	}
+	if (request_query.limit) {
 		query_limit = request_query.limit;
 		delete request_query.limit;
-	} else if (request_query.skip) {
+
+	}
+	if (request_query.skip) {
 		query_skip = request_query.skip;
 		delete request_query.skip;
 	}
