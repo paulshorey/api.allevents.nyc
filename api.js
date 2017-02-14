@@ -253,7 +253,7 @@ process.app.get('/all', function(request, response) {
 			response.end();
 		});
 });
-process.app.get('/ubus', function(request, response) {
+process.app.all('/ubus', function(request, response) {
 	process.console.log('get /ubus');
 	response.setHeader('Content-Type', 'application/json');
 	response.writeHead(200);
