@@ -204,32 +204,36 @@ process.app.all('/_contentful', function(request, response) {
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
 // proxy
-process.app.get('/proxy/json', function(request, response) {
-	process.console.log('get /proxy');
+process.app.get('/soundcloud/:one?/?:two', function(request, response) {
+	process.console.log('get /soundcloud');
 	
-	var meta = {};
-	meta.referrer = process.url.parse(request.headers.referer||'', true, true).hostname;
-	var request_query = Object.keys(request.body).length ? request.body : request.query;
+	//var meta = {};
+	//meta.referrer = process.url.parse(request.headers.referer||'', true, true).hostname;
+	//var request_query = Object.keys(request.body).length ? request.body : request.query;
+	var path = request.url.replace('/soundcloud','');
 	
-	var req = process.http.request({
-		method: 'GET',
-		path: 'http://api.soundcloud.com/users/3207?client_id=f665fc458615b821cdf1a26b6d1657f6'
-	}, function (res) {
-		res.on('data', function (data) {
-			var string = data.toString();
-
-			console.log(JSON.stringify(res.headers));
-			console.log(string);
-
-			response.setHeader('Content-Type', 'application/json');
-			response.writeHead(200);
-			response.write(string);
-			response.end();
-		});
-	});
-	req.end();
+	var http = require('http');  
+	var options = {  
+	  host: 'api.soundcloud.com',  
+	  path: path+'?client_id=f665fc458615b821cdf1a26b6d1657f6'  
+	};  
+	var callback = function(res) {  
+	  res.headers.status = res.headers.status || 500;
+	  var str = '';  
+	  res.on('data', function (chunk) {  
+	    str += chunk;  
+	  });  
+	  res.on('end', function () {  
+		response.setHeader('Content-Type', 'application/json');
+		response.writeHead(res.headers.status);
+		response.write(str);
+		response.end();
+	  });  
+	}  
+	http.request(options, callback).end();
 
 });
+
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -248,6 +252,13 @@ process.app.get('/all', function(request, response) {
 			response.write(JSON.stringify({data:all, error:0},null,"\t"));
 			response.end();
 		});
+});
+process.app.get('/ubus', function(request, response) {
+	process.console.log('get /ubus');
+	response.setHeader('Content-Type', 'application/json');
+	response.writeHead(200);
+	response.write(JSON.stringify({data:view.sites, error:0},null,"\t"));
+	response.end();
 });
 process.app.get('/sites', function(request, response) {
 	process.console.log('get /sites');
