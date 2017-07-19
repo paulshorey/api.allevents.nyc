@@ -10,8 +10,8 @@ ufw allow 80/tcp
 ufw allow 443/tcp
 
 eval "$(ssh-agent -s)"
-ssh-add ~/.ssh/ps1-git
-cd /www/api-nyc
+ssh-add ~/.ssh/gitlab
+cd /www/api.allevents.nyc
 git reset HEAD -\-hard;
 git pull
 

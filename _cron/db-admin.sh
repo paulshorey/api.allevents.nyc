@@ -1,5 +1,5 @@
 sleep 3
 
-cd /www/api-nyc/admin
+cd /www/api.allevents.nyc/admin
 
 node app.js
