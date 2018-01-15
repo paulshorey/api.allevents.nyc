@@ -426,22 +426,13 @@ process.app.all('/bot.allevents.nyc/v1/json', function(request, response) {
 // ////////////////////////////////////////////////////////////////////////////////////////////////////
 // //////////////////////////////////////////////////////////////////////////////////////////////////
 // Test Crawler
-process.app.all('/apify/v1/crawler', function(request, response) {
-	
-	// no data
-	var message = {
-		"what": "/get crawler"
+process.app.post('/apify/v1/crawler', function(request, response) {
+	var output = {
+		request
 	};
-	// yes data
-	if (request.body) {
-		message = {
-			"what": "/post crawler",
-			"postData": request.body.crawler
-		};
-	}
 
 	response.writeHead(200);
-	response.write(JSON.stringify(message));
+	response.write(JSON.stringify(output));
 	response.end();
 
 });
