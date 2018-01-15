@@ -430,14 +430,14 @@ process.app.post('/apify/v1/crawler', function(rq, rs) {
 	process.console.log('post /crawler', JSON.stringify(rq.body,null,"	"));
 
 	var crawler = rq.body.crawler;
-	crawler.customId = crawler.startUrls[0].value + Date.now();
+	// crawler.customId = crawler.startUrls[0].value + Date.now();
 
 	/*
-		1) create crawler
+		1) update NodeTestCrawler
 	*/
 	var options = {
-		uri: "https://api.apify.com/v1/6ndi68E354BYYiZqa/crawlers?token=Byc43cN3uZv2Xyxo9q6GPSvjD",
-		method: 'POST',
+		uri: "https://api.apify.com/v1/6ndi68E354BYYiZqa/crawlers/Pyt5FfSoGCRRCNtqY?token=Byc43cN3uZv2Xyxo9q6GPSvjD",
+		method: 'PUT',
 		json: crawler
 	};
 	process.request(options, function (error, response, body) {
@@ -460,7 +460,7 @@ process.app.post('/apify/v1/crawler', function(rq, rs) {
 				console.log('response response body: ',body);
 				var output = {};
 				output.status = response.statusCode;
-				output.body = error||body;
+				output.body = JSON.parse(error||body);
 		
 				if (!error && Math.round(response.statusCode/100) === 2) {
 			
