@@ -428,7 +428,7 @@ process.app.all('/bot.allevents.nyc/v1/json', function(request, response) {
 // Test Crawler
 process.app.post('/apify/v1/crawler', function(request, response) {
 	var output = {
-		request
+		request: request
 	};
 
 	response.writeHead(200);
