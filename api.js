@@ -437,7 +437,7 @@ process.app.post('/apify/v1/crawler', function(rq, rs) {
 		method: 'POST',
 		json: rq.body.crawler
 	};
-	request(options, function (error, response, body) {
+	process.request(options, function (error, response, body) {
 		console.log('response status: ',response.statusCode);
 		if (!error && response.statusCode == 200) {
 			// success
