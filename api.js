@@ -54,19 +54,19 @@ process.response = require("./node_custom/response.js");
 // secret
 process.secret = require('../secret-nyc/all.js');
 // logging
-var winston = require('winston');
-process.winston = winston.createLogger({
-	level: 'info',
-	format: winston.format.json(),
-	transports: [
-		//
-		// - Write to all logs with level `info` and below to `combined.log` 
-		// - Write all logs error (and below) to `error.log`.
-		//
-		new winston.transports.File({ filename: 'public/console/logs/error.json', level: 'error' }),
-		new winston.transports.File({ filename: 'public/console/logs/index.json' })
-	]
-});
+// var winston = require('winston');
+// process.winston = winston.createLogger({
+// 	level: 'info',
+// 	format: winston.format.json(),
+// 	transports: [
+// 		//
+// 		// - Write to all logs with level `info` and below to `combined.log` 
+// 		// - Write all logs error (and below) to `error.log`.
+// 		//
+// 		new winston.transports.File({ filename: 'public/console/logs/error.json', level: 'error' }),
+// 		new winston.transports.File({ filename: 'public/console/logs/index.json' })
+// 	]
+// });
 
 
 
@@ -209,7 +209,7 @@ process.app.all('/_contentful', function(request, response) {
 //////////////////////////////////////////////////////////////////////////////////////////////////
 // get sites
 process.app.get('/bot.allevents.nyc/v1/all', function(request, response) {
-	process.winston.info('get /all');
+	console.log('get /all');
 	var all = {};
 		all.sites = view.sites || [];
 		all.categories = view.categories || [];
@@ -223,14 +223,14 @@ process.app.get('/bot.allevents.nyc/v1/all', function(request, response) {
 		});
 });
 process.app.get('/bot.allevents.nyc/v1/sites', function(request, response) {
-	process.winston.info('get /sites');
+	console.log('get /sites');
 	response.setHeader('Content-Type', 'application/json');
 	response.writeHead(200);
 	response.write(JSON.stringify({data:view.sites, error:0},null,"\t"));
 	response.end();
 });
 process.app.get('/bot.allevents.nyc/v1/site', function(request, response) {
-	process.winston.info('get /site');
+	console.log('get /site');
 	var site = {time_attempted:Date.now()};
 	for (var si in view.sites) {
 		// if never attempted, take first
@@ -258,14 +258,14 @@ process.app.get('/bot.allevents.nyc/v1/site', function(request, response) {
 	response.end();
 });
 process.app.get('/bot.allevents.nyc/v1/categories', function(request, response) {
-	process.winston.info('get /categories');
+	console.log('get /categories');
 	response.setHeader('Content-Type', 'application/json');
 	response.writeHead(200);
 	response.write(JSON.stringify({data:view.categories, error:0},null,"\t"));
 	response.end();
 });
 process.app.get('/bot.allevents.nyc/v1/scenes', function(request, response) {
-	process.winston.info('get /categories');
+	console.log('get /categories');
 	response.setHeader('Content-Type', 'application/json');
 	response.writeHead(200);
 	response.write(JSON.stringify({data:view.scenes, error:0},null,"\t"));
@@ -364,7 +364,7 @@ process.app.all('/bot.allevents.nyc/v1/events*', function(request, response) {
 		query['timestamp'] = {$gt:process.timestamp.today_start()-1,$lt:process.timestamp.thismonth_end()};
 	}
 	// ok go
-	process.winston.info('get /events  '+JSON.stringify(query));
+	console.log('get /events  '+JSON.stringify(query));
 	model.mongoose.item
 	.find(query)
 	.limit(query_limit)
@@ -386,7 +386,7 @@ process.app.all('/bot.allevents.nyc/v1/events*', function(request, response) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // post items
 process.app.post('/bot.allevents.nyc/v1/items', function(request, response) {
-	process.winston.info('post /items');
+	console.log('post /items');
 	for (var it = 0; it < request.body.items.length; it++) {
 		var item = request.body.items[it];
 		if (item.timestamp < Date.now()) {
@@ -450,7 +450,7 @@ process.apify.testCrawlers = [
 //////////////////////////////////////////////////////////////////////////////////////////////////
 // API > Test Crawler Available
 process.app.post('/apify/v1/crawler-finished', function(rq, rs) {
-	/*log*/process.winston.info('post /crawlerFINISHED', JSON.stringify(rq.body,null,"	"));
+	/*log*/console.log('post /crawlerFINISHED', JSON.stringify(rq.body,null,"	"));
 	if (rq.body.crawlerId) {
 		var whichCrawler = process.apify.testCrawlers.findIndex(function(element){ return element.id==rq.body.crawlerId; });
 	}
@@ -460,7 +460,7 @@ process.app.post('/apify/v1/crawler-finished', function(rq, rs) {
 //////////////////////////////////////////////////////////////////////////////////////////////////
 // API > Test Crawler
 process.app.post('/apify/v1/crawler', function(rq, rs) {
-	/*log*/process.winston.info('post /crawler', JSON.stringify(rq.body,null,"	"));
+	/*log*/console.log('post /crawler', JSON.stringify(rq.body,null,"	"));
 
 	/*
 		0) validate, setup
@@ -498,7 +498,7 @@ process.app.post('/apify/v1/crawler', function(rq, rs) {
 		json: crawler
 	};
 	process.request(options, function (error, response, body) {
-		/*log*/process.winston.info('response status: ',response.statusCode);
+		/*log*/console.log('response status: ',response.statusCode);
 		var output = {};
 		output.status = response.statusCode;
 		output.body = error||body;
@@ -513,8 +513,8 @@ process.app.post('/apify/v1/crawler', function(rq, rs) {
 				method: 'GET'
 			};
 			process.request(options, function (error, response, body) {
-				/*log*/process.winston.info('response response status: ',response.statusCode);
-				/*log*/process.winston.info('response response body: ',body);
+				/*log*/console.log('response response status: ',response.statusCode);
+				/*log*/console.log('response response body: ',body);
 				var output = {};
 				output.status = response.statusCode;
 				output.body = JSON.parse(error||body);
