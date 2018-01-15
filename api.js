@@ -466,11 +466,11 @@ process.app.post('/apify/v1/crawler', function(rq, rs) {
 		0) validate, setup
 	*/
 	var crawlerId = 
-	(process.apify.testCrawlers[0].running ? process.apify.testCrawlers[0].id : 
-		(process.apify.testCrawlers[1].running ? process.apify.testCrawlers[1].id : 
-			(process.apify.testCrawlers[2].running ? process.apify.testCrawlers[2].id : 
-				(process.apify.testCrawlers[3].running ? process.apify.testCrawlers[3].id : 
-					(process.apify.testCrawlers[4].running ? process.apify.testCrawlers[4].id : 
+	(!process.apify.testCrawlers[0].running ? process.apify.testCrawlers[0].id : 
+		(!process.apify.testCrawlers[1].running ? process.apify.testCrawlers[1].id : 
+			(!process.apify.testCrawlers[2].running ? process.apify.testCrawlers[2].id : 
+				(!process.apify.testCrawlers[3].running ? process.apify.testCrawlers[3].id : 
+					(!process.apify.testCrawlers[4].running ? process.apify.testCrawlers[4].id : 
 						null
 					)
 				)
