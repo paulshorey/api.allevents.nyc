@@ -439,15 +439,48 @@ process.app.all('/bot.allevents.nyc/v1/json', function(request, response) {
 // APIFY
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////
-// API > Test Crawler
-process.app.post('/apify/v1/crawler', function(rq, rs) {
-	console.log('post /apify/v1/crawler', JSON.stringify(rq.body,null,"	"));
+// API > Get Crawler
+process.app.get('/apify/v1/crawlerGet', function(rq, rs) {
+	console.log('get /apify/v1/crawlerGet', JSON.stringify(rq.body,null,"	"));
+
+	/*
+		1) get crawler
+	*/
+	var options = {
+		uri: "https://api.apify.com/v1/"+process.secret.apify.user+"/crawlers/"+rq.body.crawler._id+"?token="+process.secret.apify.token+"",
+		method: 'GET'
+	};
+	process.request(options, function (error, response, body) {
+		var output = {};
+		output.status = response.statusCode;
+		output.body = error||body;
+		if (!error && Math.round(response.statusCode/100) === 2) {
+		
+			rs.writeHead(200);
+			rs.write(JSON.stringify(output,null,"	"));
+			rs.end();
+		
+		} else {
+					
+			rs.writeHead(500);
+			rs.write(JSON.stringify(output,null,"	"));
+			rs.end();
+
+		}
+	});	
+
+});
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////
+// API > Update Crawler > and immediately run it to get the results URL
+process.app.post('/apify/v1/crawlerUpdateExecute', function(rq, rs) {
+	console.log('post /apify/v1/crawlerUpdateExecute', JSON.stringify(rq.body,null,"	"));
 
 	/*
 		1) update crawler
 	*/
 	var options = {
-		uri: "https://api.apify.com/v1/"+process.secret.apify.user+"/crawlers/Pyt5FfSoGCRRCNtqY?token="+process.secret.apify.token+"",
+		uri: "https://api.apify.com/v1/"+process.secret.apify.user+"/crawlers/"+rq.body.crawler._id+"?token="+process.secret.apify.token+"",
 		method: 'PUT',
 		json: rq.body.crawler
 	};
