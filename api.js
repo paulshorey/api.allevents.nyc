@@ -426,16 +426,31 @@ process.app.all('/bot.allevents.nyc/v1/json', function(request, response) {
 // ////////////////////////////////////////////////////////////////////////////////////////////////////
 // //////////////////////////////////////////////////////////////////////////////////////////////////
 // Test Crawler
-process.app.post('/apify/v1/crawler', function(request, response) {
-	var output = {
-		request: {
-			data: request.body
-		}
-	};
+process.app.post('/apify/v1/crawler', function(rq, rs) {
+	process.console.log('post /crawler', JSON.stringify(rq.body,null,"	"));
 
-	response.writeHead(200);
-	response.write(JSON.stringify(output));
-	response.end();
+	var endpoints = {
+		"create_crawler": "https://api.apify.com/v1/6ndi68E354BYYiZqa/crawlers?token=Byc43cN3uZv2Xyxo9q6GPSvjD"
+	};
+	var options = {
+		uri: endpoints.create_crawler,
+		method: 'POST',
+		json: rq.body.crawler
+	};
+	request(options, function (error, response, body) {
+		console.log('response status: ',response.statusCode);
+		if (!error && response.statusCode == 200) {
+			// success
+		}
+		var output = {};
+		output.status = response.statusCode;
+		output.body = error||body;
+
+		// response to user
+		rs.writeHead(200);
+		rs.write(JSON.stringify(output,null,"	"));
+		rs.end();
+	});
 
 });
 
