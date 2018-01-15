@@ -429,13 +429,16 @@ process.app.all('/bot.allevents.nyc/v1/json', function(request, response) {
 process.app.post('/apify/v1/crawler', function(rq, rs) {
 	process.console.log('post /crawler', JSON.stringify(rq.body,null,"	"));
 
+	var crawler = rq.body.crawler;
+	crawler.customId = crawler.startUrls[0].value + Date.now();
+
 	var endpoints = {
 		"create_crawler": "https://api.apify.com/v1/6ndi68E354BYYiZqa/crawlers?token=Byc43cN3uZv2Xyxo9q6GPSvjD"
 	};
 	var options = {
 		uri: endpoints.create_crawler,
 		method: 'POST',
-		json: rq.body.crawler
+		json: crawler
 	};
 	process.request(options, function (error, response, body) {
 		console.log('response status: ',response.statusCode);
