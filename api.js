@@ -432,27 +432,54 @@ process.app.post('/apify/v1/crawler', function(rq, rs) {
 	var crawler = rq.body.crawler;
 	crawler.customId = crawler.startUrls[0].value + Date.now();
 
-	var endpoints = {
-		"create_crawler": "https://api.apify.com/v1/6ndi68E354BYYiZqa/crawlers?token=Byc43cN3uZv2Xyxo9q6GPSvjD"
-	};
+	/*
+		1) create crawler
+	*/
 	var options = {
-		uri: endpoints.create_crawler,
+		uri: "https://api.apify.com/v1/6ndi68E354BYYiZqa/crawlers?token=Byc43cN3uZv2Xyxo9q6GPSvjD",
 		method: 'POST',
 		json: crawler
 	};
 	process.request(options, function (error, response, body) {
 		console.log('response status: ',response.statusCode);
-		if (!error && response.statusCode == 200) {
-			// success
-		}
 		var output = {};
 		output.status = response.statusCode;
 		output.body = error||body;
 
-		// response to user
-		rs.writeHead(200);
-		rs.write(JSON.stringify(output,null,"	"));
-		rs.end();
+		if (!error && Math.round(response.statusCode/100) === 2) {
+			
+			/*
+				2) execute crawler
+			*/
+			var options = {
+				uri: response.body.executeUrl,
+				method: 'GET'
+			};
+			process.request(options, function (error, response, body) {
+				console.log('response response status: ',response.statusCode);
+				console.log('response response body: ',body);
+				var output = {};
+				output.status = response.statusCode;
+				output.body = error||body;
+		
+				if (!error && Math.round(response.statusCode/100) === 2) {
+			
+					// response to user
+					rs.writeHead(200);
+					rs.write(JSON.stringify(output,null,"	"));
+					rs.end();
+					
+				} else {
+					
+					// response to user
+					rs.writeHead(500);
+					rs.write(JSON.stringify(output,null,"	"));
+					rs.end();
+
+				}
+			});
+		}
+
 	});
 
 });
