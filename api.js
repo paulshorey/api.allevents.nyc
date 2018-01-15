@@ -54,6 +54,7 @@ process.response = require("./node_custom/response.js");
 // secret
 process.secret = require('../secret-nyc/all.js');
 // logging
+var winston = require('winston');
 process.winston = winston.createLogger({
 	level: 'info',
 	format: winston.format.json(),
@@ -449,7 +450,7 @@ process.apify.testCrawlers = [
 //////////////////////////////////////////////////////////////////////////////////////////////////
 // API > Test Crawler Available
 process.app.post('/apify/v1/crawler-finished', function(rq, rs) {
-	process.winston.info('post /crawlerFINISHED', JSON.stringify(rq.body,null,"	"));
+	/*log*/process.winston.info('post /crawlerFINISHED', JSON.stringify(rq.body,null,"	"));
 	if (rq.body.crawlerId) {
 		var whichCrawler = process.apify.testCrawlers.findIndex(function(element){ return element.id==rq.body.crawlerId; });
 	}
@@ -459,7 +460,7 @@ process.app.post('/apify/v1/crawler-finished', function(rq, rs) {
 //////////////////////////////////////////////////////////////////////////////////////////////////
 // API > Test Crawler
 process.app.post('/apify/v1/crawler', function(rq, rs) {
-	process.winston.info('post /crawler', JSON.stringify(rq.body,null,"	"));
+	/*log*/process.winston.info('post /crawler', JSON.stringify(rq.body,null,"	"));
 
 	/*
 		0) validate, setup
@@ -497,7 +498,7 @@ process.app.post('/apify/v1/crawler', function(rq, rs) {
 		json: crawler
 	};
 	process.request(options, function (error, response, body) {
-		process.winston.info('response status: ',response.statusCode);
+		/*log*/process.winston.info('response status: ',response.statusCode);
 		var output = {};
 		output.status = response.statusCode;
 		output.body = error||body;
@@ -512,8 +513,8 @@ process.app.post('/apify/v1/crawler', function(rq, rs) {
 				method: 'GET'
 			};
 			process.request(options, function (error, response, body) {
-				process.winston.info('response response status: ',response.statusCode);
-				process.winston.info('response response body: ',body);
+				/*log*/process.winston.info('response response status: ',response.statusCode);
+				/*log*/process.winston.info('response response body: ',body);
 				var output = {};
 				output.status = response.statusCode;
 				output.body = JSON.parse(error||body);
