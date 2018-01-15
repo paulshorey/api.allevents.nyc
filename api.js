@@ -453,7 +453,7 @@ process.app.get('/apify/v1/crawlerGet', function(rq, rs) {
 	process.request(options, function (error, response, body) {
 		var output = {};
 		output.status = response.statusCode;
-		output.body = error||body;
+		output.body = JSON.parse(error||body);
 		if (!error && Math.round(response.statusCode/100) === 2) {
 		
 			rs.writeHead(200);
