@@ -1,10 +1,3 @@
-/*
-	GUIDELINES:
-	response .data is always array of objects, even if only one item requested or queried
-	post request consists of one or more objects, named corresponding to the object type they are modifying
-	get request consists of one or more strings, referencing the url or id of the aptly named object type
-*/
-
 var pro = process;
 process.inc = {};
 process.inc.express = require('express');
@@ -36,10 +29,13 @@ process.app = process.inc.express();
 		extended: true
 	}));
 	process.app.use(process.inc.express.static('public'));
-	process.app.disable('trust proxy');
+	process.app.disable('trust proxy');	
 	process.app.use(function(request, response, next){
 		var referrer = process.url.parse(request.headers.referer||'', true, true).hostname;
-		response.setHeader('Access-Control-Allow-Origin', '*'); // header contains the invalid value 'app.allevents.nyc'. Origin 'http://app.allevents.nyc' is therefore not allowed access <-- don't know if browser will include http:// or not
+		/* !!!! 
+			FIX THIS ASAP :
+		!!!! */
+		response.setHeader('Access-Control-Allow-Origin', '*'); 
 		response.setHeader('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
 		response.setHeader('Access-Control-Allow-Headers', 'Content-Type, Cache-Control, Pragma, Authorization, Content-Length, X-Requested-With, X-Host');
 		if ('OPTIONS' == request.method) {
@@ -53,28 +49,32 @@ process.app = process.inc.express();
 	});
 // custom
 process.fun = require("./node_custom/fun.js");
-process.console = require("./node_custom/console.js").console; // uses process.app
+process.console = require("./node_custom/console.js").console;
 process.response = require("./node_custom/response.js");
 // secret
 process.secret = require('../secret-nyc/all.js');
+
+
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+// For > BOT.ALLEVENTS.NYC > API v1 //
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////
 // contentful (sites)
 process.contentful.myClient = process.contentful.createClient({
   space: process.secret.contentful_delivery.space,
   accessToken: process.secret.contentful_delivery.access_token
-  // ,secure: true
-  // ,host: 'cdn.contentful.com'
-  // ,resolveLinks: true
-  // agent: agentInstance
 });
 // mongoose (items)
 process.mongoose = require('mongoose');
 process.mongoose.connect('mongodb://localhost/api');
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // MODEL
 var model = {};
-
 // contentful
 model.contentful = {};
 model.contentful.myEntries = function(entries){
@@ -120,7 +120,6 @@ model.contentful.getContent = function(item,items){
 		process.console.info(''+(items_new.length||0)+' '+items);
 	});
 };
-
 // mongoose
 model.mongoose = {};
 model.mongoose.schemas = {};
@@ -145,10 +144,8 @@ model.mongoose.schemas.item = {
 	source_link: { type:String, required: true },
 	source_title: { type:String, required: true },
 	site: Array
-
 };
 model.mongoose.item = process.mongoose.model('Item', model.mongoose.schemas.item);
-
 // time
 process.timestamp = new function() {
 	var timestamp = function(){ 
@@ -168,9 +165,6 @@ process.timestamp = new function() {
 	this.thisweek_end = function(){ return timestamp() +7*(24*60*60*1000) -1; };
 	this.thismonth_end = function(){ return timestamp() +31*(24*60*60*1000) -1; };
 }();
-console.warn('timestamp.tomorrow_start()',process.timestamp.tomorrow_start());
-
-
 //////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // VIEW
@@ -178,7 +172,6 @@ var view = {};
 model.contentful.getContent('site','sites');
 model.contentful.getContent('category','categories');
 model.contentful.getContent('scene','scenes');
-
 //////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // HOOK
@@ -194,52 +187,14 @@ process.app.all('/_contentful', function(request, response) {
 });
 // view.items
 // not in memory, query model.mongoose.item.find({},callback);
-
-
 //////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////
-// THE API //
+// BOT.ALLEVENTS.NYC > API v1 //
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////
-
-// proxy
-process.app.get('/soundcloud/:one?/?:two', function(request, response) {
-	process.console.log('get /soundcloud');
-	
-	//var meta = {};
-	//meta.referrer = process.url.parse(request.headers.referer||'', true, true).hostname;
-	//var request_query = Object.keys(request.body).length ? request.body : request.query;
-	var path = request.url.replace('/soundcloud','');
-	
-	var http = require('http');  
-	var options = {  
-	  host: 'api.soundcloud.com',  
-	  path: path+'?client_id=f665fc458615b821cdf1a26b6d1657f6'  
-	};  
-	var callback = function(res) {  
-	  res.headers.status = res.headers.status || 500;
-	  var str = '';  
-	  res.on('data', function (chunk) {  
-	    str += chunk;  
-	  });  
-	  res.on('end', function () {  
-		response.setHeader('Content-Type', 'application/json');
-		response.writeHead(res.headers.status);
-		response.write(str);
-		response.end();
-	  });  
-	}  
-	http.request(options, callback).end();
-
-});
-
-
-
-//////////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////////////////////
 // get sites
-process.app.get('/all', function(request, response) {
+process.app.get('/bot.allevents.nyc/v1/all', function(request, response) {
 	process.console.log('get /all');
 	var all = {};
 		all.sites = view.sites || [];
@@ -253,77 +208,66 @@ process.app.get('/all', function(request, response) {
 			response.end();
 		});
 });
-process.app.all('/ubus', function(request, response) {
-	process.console.log('get /ubus');
-	response.setHeader('Content-Type', 'application/json');
-	response.writeHead(200);
-	response.write(JSON.stringify({data:view.sites, error:0},null,"\t"));
-	response.end();
-});
-process.app.get('/sites', function(request, response) {
+process.app.get('/bot.allevents.nyc/v1/sites', function(request, response) {
 	process.console.log('get /sites');
 	response.setHeader('Content-Type', 'application/json');
 	response.writeHead(200);
 	response.write(JSON.stringify({data:view.sites, error:0},null,"\t"));
 	response.end();
 });
-
-	process.app.get('/site', function(request, response) {
-		process.console.log('get /site');
-		var site = {time_attempted:Date.now()};
-		for (var si in view.sites) {
-			// if never attempted, take first
-			if (!view.sites[si].time_attempted) {
-				site = view.sites[si];
-				break;
-			// if attempted, keep going to find oldest
-			} else if (view.sites[si].time_attempted < site.time_attempted) {
-				site = view.sites[si];
-			}
+process.app.get('/bot.allevents.nyc/v1/site', function(request, response) {
+	process.console.log('get /site');
+	var site = {time_attempted:Date.now()};
+	for (var si in view.sites) {
+		// if never attempted, take first
+		if (!view.sites[si].time_attempted) {
+			site = view.sites[si];
+			break;
+		// if attempted, keep going to find oldest
+		} else if (view.sites[si].time_attempted < site.time_attempted) {
+			site = view.sites[si];
 		}
-		// if attempted in less than 4 hours
-		if (site.time_attempted > Date.now()-(1000*60*60*4)) {
-			response.setHeader('Content-Type', 'application/json');
-			response.writeHead(500);
-			response.write(JSON.stringify({data:null,error:'Recently crawled each site... wait a while to bother them again'},null,"\t"));
-			response.end();
-			return;
-		}
-		// data
-		site.time_attempted = Date.now();
+	}
+	// if attempted in less than 4 hours
+	if (site.time_attempted > Date.now()-(1000*60*60*4)) {
 		response.setHeader('Content-Type', 'application/json');
-		response.writeHead(200);
-		response.write(JSON.stringify({data:[site], error:0},null,"\t"));
+		response.writeHead(500);
+		response.write(JSON.stringify({data:null,error:'Recently crawled each site... wait a while to bother them again'},null,"\t"));
 		response.end();
-	});
-process.app.get('/categories', function(request, response) {
+		return;
+	}
+	// data
+	site.time_attempted = Date.now();
+	response.setHeader('Content-Type', 'application/json');
+	response.writeHead(200);
+	response.write(JSON.stringify({data:[site], error:0},null,"\t"));
+	response.end();
+});
+process.app.get('/bot.allevents.nyc/v1/categories', function(request, response) {
 	process.console.log('get /categories');
 	response.setHeader('Content-Type', 'application/json');
 	response.writeHead(200);
 	response.write(JSON.stringify({data:view.categories, error:0},null,"\t"));
 	response.end();
 });
-process.app.get('/scenes', function(request, response) {
+process.app.get('/bot.allevents.nyc/v1/scenes', function(request, response) {
 	process.console.log('get /categories');
 	response.setHeader('Content-Type', 'application/json');
 	response.writeHead(200);
 	response.write(JSON.stringify({data:view.scenes, error:0},null,"\t"));
 	response.end();
 });
-
-process.app.get('/time*', function(request, response) {
+process.app.get('/bot.allevents.nyc/v1/time*', function(request, response) {
 	var when = (request.params[0] ? request.params[0].substr(1) : '');
 	response.setHeader('Content-Type', 'application/json'); 
 	response.writeHead(200);
 	response.write(JSON.stringify({data: process.timestamp[when||'now'](), error:0},null,"\t"));
 	response.end();
 });
-
-
 //////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // count events
-process.app.all('/count', function(request, response) {
+process.app.all('/bot.allevents.nyc/v1/count', function(request, response) {
 	process.console.info('/count');
 	model.mongoose.item
 	.count({})
@@ -339,7 +283,7 @@ process.app.all('/count', function(request, response) {
 	});
 });
 // remove events
-process.app.all('/remove', function(request, response) {
+process.app.all('/bot.allevents.nyc/v1/remove', function(request, response) {
 	process.console.warn('/remove');
 	model.mongoose.item
 	.remove({})
@@ -355,7 +299,7 @@ process.app.all('/remove', function(request, response) {
 	});
 });
 // get events
-process.app.all('/events*', function(request, response) {
+process.app.all('/bot.allevents.nyc/v1/events*', function(request, response) {
 	var meta = {};
 	meta.referrer = process.url.parse(request.headers.referer||'', true, true).hostname;
 	var request_query = Object.keys(request.body).length ? request.body : request.query;
@@ -363,41 +307,34 @@ process.app.all('/events*', function(request, response) {
 	process.console.warn('/events '+request.method+' from '+meta.referrer+' '+JSON.stringify(request_query));
 	var query_limit = 1000;
 	var query_skip = 0;
-
 	// first special keys
 	if (request_query.text) {
 		query.$text = {$search:request_query.text};
 		delete request_query.text;
-
 	}
 	if (request_query.limit) {
 		query_limit = request_query.limit;
 		delete request_query.limit;
-
 	}
 	if (request_query.skip) {
 		query_skip = request_query.skip;
 		delete request_query.skip;
 	}
-
 	// then automatic keys
 	for (var qk in request_query) {
 		if (qk=='category' || qk=='scene'){
 			request_query[qk] = process.fun.capitalize(request_query[qk]);
-
 			// multiple terms // dont work, can't store finished RegExp object as a variable, it gets output as empty object
 			// query[qk] = {$in:[]};
 			// var split = request_query[qk].split(',').map(function(e){return e.trim();});
 			// for (var sk in split) {
 			// 	query[qk].$in.push( new RegExp(split[sk],'i') );
 			// }
-
 			// for now just do one
 			query[qk] = new RegExp(request_query[qk].replace('+','\\+'),'');
 
 		}
 	}
-
 	// required & default keys
 	query['timestamp'] = {$gt: (process.timestamp.today_start() - 1) };
 	if (request_query['time']=='today') {
@@ -412,7 +349,6 @@ process.app.all('/events*', function(request, response) {
 	else if (request_query['time']=='this month') {
 		query['timestamp'] = {$gt:process.timestamp.today_start()-1,$lt:process.timestamp.thismonth_end()};
 	}
-
 	// ok go
 	process.console.log('get /events  '+JSON.stringify(query));
 	model.mongoose.item
@@ -431,15 +367,12 @@ process.app.all('/events*', function(request, response) {
 			response.end();
 		}
 	});
-
 });
-
 //////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // post items
-process.app.post('/items', function(request, response) {
+process.app.post('/bot.allevents.nyc/v1/items', function(request, response) {
 	process.console.log('post /items');
-	
 	for (var it = 0; it < request.body.items.length; it++) {
 		var item = request.body.items[it];
 		if (item.timestamp < Date.now()) {
@@ -462,18 +395,15 @@ process.app.post('/items', function(request, response) {
 	}
 
 });
-
-
 // //////////////////////////////////////////////////////////////////////////////////////////////////
 // ////////////////////////////////////////////////////////////////////////////////////////////////////
 // // EXTRAS
-process.app.all('/json', function(request, response) {
+process.app.all('/bot.allevents.nyc/v1/json', function(request, response) {
 	var meta = {};
 	meta.referrer = process.url.parse(request.headers.referer||'', true, true).hostname;
 	var request_query = Object.keys(request.body).length ? request.body : request.query;
 	var query = {};
 	process.console.warn('/json '+request.method+' from '+meta.referrer+' '+JSON.stringify(request_query));
-
 	if (request_query.file) {
 		var json = process.fs.readFileSync('public/json/'+request_query.file+'.json', 'utf8');
 
@@ -485,129 +415,30 @@ process.app.all('/json', function(request, response) {
 	}
 });
 
-// // SSL
-// process.app.all('/.well-known/acme-challenge/*', function(request, response) {
-// 	response.writeHead(200);
-// 	response.write('success');
-// 	response.end();
-// });
+
+
 
 
 // //////////////////////////////////////////////////////////////////////////////////////////////////
 // ////////////////////////////////////////////////////////////////////////////////////////////////////
-// // POST SITE
-// process.app.post('/site', function(request, response) {
-// 	// validate
-// 	if (!request.body.site || !request.body.site.url || !request.body.site.items) {
-// 		// fail
-// 		var error = {
-// 			code: 510,
-// 			message: '/site POST requires request.body.site == {url:string,items:{}}'
-// 		}
-// 		process.console.error(error.message);
-// 		process.response.json(response, error);
-// 		return false;
-// 	}
-// 	if (!process.fs.existsSync('./public/json/sites')) {
-// 		process.fs.mkdirSync('./public/json/sites');
-// 	}
-	
-// 	// filter
-// 	var site = request.body.site;
-// 	//site.urlEncoded = encodeUri
-	
-// 	// site
-// 	var sid = process.fun.str_uid(request.body.site.url);
-// 	process.console.log('post site: ' + encodeURIComponent(request.body.site.url));
-// 	var file = process.fs.writeFile(
-// 		'./public/json/sites/' + sid + '.json',
-// 		JSON.stringify(site),
-// 		'utf8',
-// 		function(error) {
-// 			// response: error
-// 			if (error) {
-// 				process.response.json(response, {
-// 					status: 'error',
-// 					message: "Couldn't write file .json"
-// 				});
-// 				return false;
-// 			}
-// 			// response: success
-// 			process.response.json(response, {});
-// 		}
-// 	);
-
-// 	// sites
-// 	model.contentful.sites[site.url] = site;
-// 	var file = process.fs.writeFile(
-// 		'./public/json/sites.json',
-// 		JSON.stringify(model.contentful.sites),
-// 		'utf8',
-// 		function(error) {
-// 			if (error) {
-// 				process.console.error("Couldn't write file ./public/json/sites.json");
-// 				return false;
-// 			}
-// 		}
-// 	);
-// });
-
-
+// //////////////////////////////////////////////////////////////////////////////////////////////////////
+// APIFY
+// ////////////////////////////////////////////////////////////////////////////////////////////////////
 // //////////////////////////////////////////////////////////////////////////////////////////////////
-// // GET SITE
-// process.app.get('/site', function(request, response) {
-// 	// validate
-// 	if (!request.query.url || request.query.url.indexOf('http') !== 0) {
-// 		// fail
-// 		var error = {
-// 			code: 511,
-// 			message: 'GET /site requires ?url=http://...'
-// 		}
-// 		process.console.warn(error.message);
-// 		process.response.json(response, error);
-// 		return false;
-// 	}
-// 	if (!process.fs.existsSync('./public/json/sites')) {
-// 		process.fs.mkdirSync('./public/json/sites');
-// 	}
-// 	// get
-// 	var sid = process.fun.str_uid(request.query.url);
-// 	process.console.log('get site: ' + request.query.url);
-// 	process.fs.readFile('./public/json/sites/' + sid + '.json', 'utf8', function(error, site) {
-// 		if (site) {
-// 			// response: success
-// 			process.response.json(response, JSON.parse(site));
-// 		} else {
-// 			// response: error
-// 			process.response.json(response, {
-// 				status: 'error',
-// 				message: "Couldn't find site file .json"
-// 			});
-// 			return false;
-// 		}
-// 	});
-// });
+// Test Crawler
+process.app.post('/apify/v1/crawler', function(request, response) {
+	
+	process.console.log('post /crawler');
+	process.console.log(request.body.crawler);
+
+});
 
 
-// ////////////////////////////////////////////////////////////////////////////////////////////////////
-// ////////////////////////////////////////////////////////////////////////////////////////////////////
-// // 404
-// process.app.all('*', function(request, response) {
-// 	// fail
-// 	var error = {
-// 		code: 400,
-// 		status: "error",
-// 		message: 'Page not found - bad request'
-// 	};
-// 	process.console.warn(error.message);
-// 	process.response.json(response, error);
-// });
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // start
 var httpServer = process.http.createServer(process.app);
 httpServer.listen(1080);
-
 var httpsServer = process.https.createServer({key: process.fs.readFileSync('/etc/letsencrypt/live/api.allevents.nyc/privkey.pem', 'utf8'), cert: process.fs.readFileSync('/etc/letsencrypt/live/api.allevents.nyc/fullchain.pem', 'utf8')}, process.app);
 httpsServer.listen(1443);
