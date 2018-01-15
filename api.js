@@ -495,7 +495,7 @@ process.app.post('/apify/v1/crawler', function(rq, rs) {
 	var options = {
 		uri: "https://api.apify.com/v1/"+process.secret.apify.user+"/crawlers/"+crawlerId+"?token="+process.secret.apify.token+"",
 		method: 'PUT',
-		json: crawler
+		json: rq.body.crawler
 	};
 	process.request(options, function (error, response, body) {
 		/*log*/console.log('response status: ',response.statusCode);
