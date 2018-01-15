@@ -437,71 +437,24 @@ process.app.all('/bot.allevents.nyc/v1/json', function(request, response) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 // APIFY
-process.apify = {};
-process.apify.testCrawlers = [
-	{id:'Pyt5FfSoGCRRCNtqY',running:false},
-	{id:'6N4v7WkDLSasv8Pa8',running:false},
-	{id:'zL9ZK8Cr92x6f3gei',funning:false},
-	{id:'6DfW2jJDSMpa7pMZq',running:false},
-	{id:'XLvZtbgwe6Rctz6Pm',running:false}
-];
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////////////
-// API > Test Crawler Available
-process.app.post('/apify/v1/crawler-finished', function(rq, rs) {
-	/*log*/console.log('post /crawlerFINISHED', JSON.stringify(rq.body,null,"	"));
-	if (rq.body.crawler._id) {
-		var whichCrawler = process.apify.testCrawlers.findIndex(function(element){ return element.id==rq.body.crawler._id; });
-	}
-});
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////
 // API > Test Crawler
 process.app.post('/apify/v1/crawler', function(rq, rs) {
-	/*log*/console.log('post /crawler', JSON.stringify(rq.body,null,"	"));
+	console.log('post /apify/v1/crawler', JSON.stringify(rq.body,null,"	"));
 
 	/*
-		0) validate, setup
-	*/
-	rq.body.crawler._id = 
-	(!process.apify.testCrawlers[0].running ? process.apify.testCrawlers[0].id : 
-		(!process.apify.testCrawlers[1].running ? process.apify.testCrawlers[1].id : 
-			(!process.apify.testCrawlers[2].running ? process.apify.testCrawlers[2].id : 
-				(!process.apify.testCrawlers[3].running ? process.apify.testCrawlers[3].id : 
-					(!process.apify.testCrawlers[4].running ? process.apify.testCrawlers[4].id : 
-						null
-					)
-				)
-			)
-		)
-	);
-	if (!rq.body.crawler._id) {
-		var output = {
-			status: 500,
-			error: "Sorry, seems like all 5 test crawlers are busy. Please wait a minute and try again. '"+JSON.stringify(process.apify.testCrawlers)+"'"
-		};
-		// response to user
-		rs.writeHead(500);
-		rs.write(JSON.stringify(output,null,"	"));
-		rs.end();
-	}
-
-	/*
-		1) update NodeTestCrawler
+		1) update crawler
 	*/
 	var options = {
-		uri: "https://api.apify.com/v1/"+process.secret.apify.user+"/crawlers/"+rq.body.crawler._id+"?token="+process.secret.apify.token+"",
+		uri: "https://api.apify.com/v1/"+process.secret.apify.user+"/crawlers/Pyt5FfSoGCRRCNtqY?token="+process.secret.apify.token+"",
 		method: 'PUT',
 		json: rq.body.crawler
 	};
 	process.request(options, function (error, response, body) {
-		/*log*/console.log('response status: ',response.statusCode);
 		var output = {};
 		output.status = response.statusCode;
 		output.body = error||body;
-
 		if (!error && Math.round(response.statusCode/100) === 2) {
 			
 			/*
@@ -512,22 +465,17 @@ process.app.post('/apify/v1/crawler', function(rq, rs) {
 				method: 'GET'
 			};
 			process.request(options, function (error, response, body) {
-				/*log*/console.log('response response status: ',response.statusCode);
-				/*log*/console.log('response response body: ',body);
 				var output = {};
 				output.status = response.statusCode;
 				output.body = JSON.parse(error||body);
-		
 				if (!error && Math.round(response.statusCode/100) === 2) {
 			
-					// response to user
 					rs.writeHead(200);
 					rs.write(JSON.stringify(output,null,"	"));
 					rs.end();
 					
 				} else {
 					
-					// response to user
 					rs.writeHead(500);
 					rs.write(JSON.stringify(output,null,"	"));
 					rs.end();
