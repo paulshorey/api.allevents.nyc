@@ -49,10 +49,23 @@ process.app = process.inc.express();
 	});
 // custom
 process.fun = require("./node_custom/fun.js");
-process.console = require("./node_custom/console.js").console;
+// process.console = require("./node_custom/console.js").console;
 process.response = require("./node_custom/response.js");
 // secret
 process.secret = require('../secret-nyc/all.js');
+// logging
+process.winston = winston.createLogger({
+	level: 'info',
+	format: winston.format.json(),
+	transports: [
+		//
+		// - Write to all logs with level `info` and below to `combined.log` 
+		// - Write all logs error (and below) to `error.log`.
+		//
+		new winston.transports.File({ filename: 'public/console/logs/error.json', level: 'error' }),
+		new winston.transports.File({ filename: 'public/console/logs/index.json' })
+	]
+});
 
 
 
@@ -195,7 +208,7 @@ process.app.all('/_contentful', function(request, response) {
 //////////////////////////////////////////////////////////////////////////////////////////////////
 // get sites
 process.app.get('/bot.allevents.nyc/v1/all', function(request, response) {
-	process.console.log('get /all');
+	process.winston.info('get /all');
 	var all = {};
 		all.sites = view.sites || [];
 		all.categories = view.categories || [];
@@ -209,14 +222,14 @@ process.app.get('/bot.allevents.nyc/v1/all', function(request, response) {
 		});
 });
 process.app.get('/bot.allevents.nyc/v1/sites', function(request, response) {
-	process.console.log('get /sites');
+	process.winston.info('get /sites');
 	response.setHeader('Content-Type', 'application/json');
 	response.writeHead(200);
 	response.write(JSON.stringify({data:view.sites, error:0},null,"\t"));
 	response.end();
 });
 process.app.get('/bot.allevents.nyc/v1/site', function(request, response) {
-	process.console.log('get /site');
+	process.winston.info('get /site');
 	var site = {time_attempted:Date.now()};
 	for (var si in view.sites) {
 		// if never attempted, take first
@@ -244,14 +257,14 @@ process.app.get('/bot.allevents.nyc/v1/site', function(request, response) {
 	response.end();
 });
 process.app.get('/bot.allevents.nyc/v1/categories', function(request, response) {
-	process.console.log('get /categories');
+	process.winston.info('get /categories');
 	response.setHeader('Content-Type', 'application/json');
 	response.writeHead(200);
 	response.write(JSON.stringify({data:view.categories, error:0},null,"\t"));
 	response.end();
 });
 process.app.get('/bot.allevents.nyc/v1/scenes', function(request, response) {
-	process.console.log('get /categories');
+	process.winston.info('get /categories');
 	response.setHeader('Content-Type', 'application/json');
 	response.writeHead(200);
 	response.write(JSON.stringify({data:view.scenes, error:0},null,"\t"));
@@ -350,7 +363,7 @@ process.app.all('/bot.allevents.nyc/v1/events*', function(request, response) {
 		query['timestamp'] = {$gt:process.timestamp.today_start()-1,$lt:process.timestamp.thismonth_end()};
 	}
 	// ok go
-	process.console.log('get /events  '+JSON.stringify(query));
+	process.winston.info('get /events  '+JSON.stringify(query));
 	model.mongoose.item
 	.find(query)
 	.limit(query_limit)
@@ -372,7 +385,7 @@ process.app.all('/bot.allevents.nyc/v1/events*', function(request, response) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // post items
 process.app.post('/bot.allevents.nyc/v1/items', function(request, response) {
-	process.console.log('post /items');
+	process.winston.info('post /items');
 	for (var it = 0; it < request.body.items.length; it++) {
 		var item = request.body.items[it];
 		if (item.timestamp < Date.now()) {
@@ -419,29 +432,72 @@ process.app.all('/bot.allevents.nyc/v1/json', function(request, response) {
 
 
 
-// //////////////////////////////////////////////////////////////////////////////////////////////////
-// ////////////////////////////////////////////////////////////////////////////////////////////////////
-// //////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////
 // APIFY
-// ////////////////////////////////////////////////////////////////////////////////////////////////////
-// //////////////////////////////////////////////////////////////////////////////////////////////////
-// Test Crawler
-process.app.post('/apify/v1/crawler', function(rq, rs) {
-	process.console.log('post /crawler', JSON.stringify(rq.body,null,"	"));
+process.apify = {};
+process.apify.testCrawlers = [
+	{id:'Pyt5FfSoGCRRCNtqY',running:false},
+	{id:'6N4v7WkDLSasv8Pa8',running:false},
+	{id:'zL9ZK8Cr92x6f3gei',funning:false},
+	{id:'6DfW2jJDSMpa7pMZq',running:false},
+	{id:'XLvZtbgwe6Rctz6Pm',running:false}
+];
 
-	var crawler = rq.body.crawler;
-	// crawler.customId = crawler.startUrls[0].value + Date.now();
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////
+// API > Test Crawler Available
+process.app.post('/apify/v1/crawler-finished', function(rq, rs) {
+	process.winston.info('post /crawlerFINISHED', JSON.stringify(rq.body,null,"	"));
+	if (rq.body.crawlerId) {
+		var whichCrawler = process.apify.testCrawlers.findIndex(function(element){ return element.id==rq.body.crawlerId; });
+	}
+});
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////
+// API > Test Crawler
+process.app.post('/apify/v1/crawler', function(rq, rs) {
+	process.winston.info('post /crawler', JSON.stringify(rq.body,null,"	"));
+
+	/*
+		0) validate, setup
+	*/
+	var crawlerId = 
+	(process.apify.testCrawlers[0].running ? process.apify.testCrawlers[0].id : 
+		(process.apify.testCrawlers[1].running ? process.apify.testCrawlers[1].id : 
+			(process.apify.testCrawlers[2].running ? process.apify.testCrawlers[2].id : 
+				(process.apify.testCrawlers[3].running ? process.apify.testCrawlers[3].id : 
+					(process.apify.testCrawlers[4].running ? process.apify.testCrawlers[4].id : 
+						null
+					)
+				)
+			)
+		)
+	);
+	rq.body.crawler._id = crawlerId;
+	if (!crawlerId) {
+		var output = {
+			status: 500,
+			error: "Sorry, seems like all 5 test crawlers are busy. Please wait a minute and try again. '"+JSON.stringify(process.apify.testCrawlers)+"'"
+		};
+		// response to user
+		rs.writeHead(500);
+		rs.write(JSON.stringify(output,null,"	"));
+		rs.end();
+	}
 
 	/*
 		1) update NodeTestCrawler
 	*/
 	var options = {
-		uri: "https://api.apify.com/v1/6ndi68E354BYYiZqa/crawlers/Pyt5FfSoGCRRCNtqY?token=Byc43cN3uZv2Xyxo9q6GPSvjD",
+		uri: "https://api.apify.com/v1/"+process.secret.apify.user+"/crawlers/"+crawlerId+"?token="+process.secret.apify.token+"",
 		method: 'PUT',
 		json: crawler
 	};
 	process.request(options, function (error, response, body) {
-		console.log('response status: ',response.statusCode);
+		process.winston.info('response status: ',response.statusCode);
 		var output = {};
 		output.status = response.statusCode;
 		output.body = error||body;
@@ -456,8 +512,8 @@ process.app.post('/apify/v1/crawler', function(rq, rs) {
 				method: 'GET'
 			};
 			process.request(options, function (error, response, body) {
-				console.log('response response status: ',response.statusCode);
-				console.log('response response body: ',body);
+				process.winston.info('response response status: ',response.statusCode);
+				process.winston.info('response response body: ',body);
 				var output = {};
 				output.status = response.statusCode;
 				output.body = JSON.parse(error||body);
@@ -493,3 +549,15 @@ var httpServer = process.http.createServer(process.app);
 httpServer.listen(1080);
 var httpsServer = process.https.createServer({key: process.fs.readFileSync('/etc/letsencrypt/live/api.allevents.nyc/privkey.pem', 'utf8'), cert: process.fs.readFileSync('/etc/letsencrypt/live/api.allevents.nyc/fullchain.pem', 'utf8')}, process.app);
 httpsServer.listen(1443);
+// end
+process.stdin.resume();//so the program will not close instantly
+function exitHandler(options, err) {
+    if (options.cleanup) console.log('clean');
+    if (err) console.log(err.stack);
+    if (options.exit) process.exit();
+}
+process.on('exit', exitHandler.bind(null,{cleanup:true}));//do something when app is closing
+process.on('SIGINT', exitHandler.bind(null, {exit:true}));//catches ctrl+c event
+process.on('SIGUSR1', exitHandler.bind(null, {exit:true}));// catches "kill pid" (for example: nodemon restart)
+process.on('SIGUSR2', exitHandler.bind(null, {exit:true}));
+process.on('uncaughtException', exitHandler.bind(null, {exit:true}));//catches uncaught exceptions
