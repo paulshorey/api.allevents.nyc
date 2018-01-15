@@ -442,12 +442,12 @@ process.app.all('/bot.allevents.nyc/v1/json', function(request, response) {
 // API > Get Crawler
 process.app.get('/apify/v1/crawlerGet', function(rq, rs) {
 	console.log('get /apify/v1/crawlerGet', JSON.stringify(rq.body,null,"	"));
-
+	
 	/*
 		1) get crawler
 	*/
 	var options = {
-		uri: "https://api.apify.com/v1/"+process.secret.apify.user+"/crawlers/"+rq.body.crawler._id+"?token="+process.secret.apify.token+"",
+		uri: "https://api.apify.com/v1/"+process.secret.apify.user+"/crawlers/"+rq.query.crawler._id+"?token="+process.secret.apify.token+"",
 		method: 'GET'
 	};
 	process.request(options, function (error, response, body) {
