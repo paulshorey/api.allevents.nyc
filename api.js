@@ -451,8 +451,8 @@ process.apify.testCrawlers = [
 // API > Test Crawler Available
 process.app.post('/apify/v1/crawler-finished', function(rq, rs) {
 	/*log*/console.log('post /crawlerFINISHED', JSON.stringify(rq.body,null,"	"));
-	if (rq.body.crawlerId) {
-		var whichCrawler = process.apify.testCrawlers.findIndex(function(element){ return element.id==rq.body.crawlerId; });
+	if (rq.body.crawler._id) {
+		var whichCrawler = process.apify.testCrawlers.findIndex(function(element){ return element.id==rq.body.crawler._id; });
 	}
 });
 
@@ -465,7 +465,7 @@ process.app.post('/apify/v1/crawler', function(rq, rs) {
 	/*
 		0) validate, setup
 	*/
-	var crawlerId = 
+	rq.body.crawler._id = 
 	(!process.apify.testCrawlers[0].running ? process.apify.testCrawlers[0].id : 
 		(!process.apify.testCrawlers[1].running ? process.apify.testCrawlers[1].id : 
 			(!process.apify.testCrawlers[2].running ? process.apify.testCrawlers[2].id : 
@@ -477,8 +477,7 @@ process.app.post('/apify/v1/crawler', function(rq, rs) {
 			)
 		)
 	);
-	rq.body.crawler._id = crawlerId;
-	if (!crawlerId) {
+	if (!rq.body.crawler._id) {
 		var output = {
 			status: 500,
 			error: "Sorry, seems like all 5 test crawlers are busy. Please wait a minute and try again. '"+JSON.stringify(process.apify.testCrawlers)+"'"
@@ -493,7 +492,7 @@ process.app.post('/apify/v1/crawler', function(rq, rs) {
 		1) update NodeTestCrawler
 	*/
 	var options = {
-		uri: "https://api.apify.com/v1/"+process.secret.apify.user+"/crawlers/"+crawlerId+"?token="+process.secret.apify.token+"",
+		uri: "https://api.apify.com/v1/"+process.secret.apify.user+"/crawlers/"+rq.body.crawler._id+"?token="+process.secret.apify.token+"",
 		method: 'PUT',
 		json: rq.body.crawler
 	};
